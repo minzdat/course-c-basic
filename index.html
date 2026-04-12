@@ -86,8 +86,10 @@
             font-family: var(--font-code);
             font-size: 0.875em;
             color: #0f172a;
+            word-break: break-word;
         }
 
+        /* Tối ưu bảng hiển thị Responsive trên Mobile */
         .theory-content table {
             width: 100%;
             border-collapse: collapse;
@@ -95,8 +97,18 @@
             font-size: 0.95rem;
             background: white;
             border-radius: 0.75rem;
-            overflow: hidden;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            display: block;
+            /* Hỗ trợ cuộn ngang trên điện thoại */
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        @media (min-width: 768px) {
+            .theory-content table {
+                display: table;
+                white-space: normal;
+            }
         }
 
         .theory-content th,
@@ -172,10 +184,10 @@
                         <path d="m14.5 4-5 16"></path>
                     </svg>
                 </div>
-                <h1 class="font-black text-lg sm:text-xl md:text-2xl text-slate-900 tracking-tight">{{
+                <h1 class="font-black text-lg sm:text-xl md:text-2xl text-slate-900 tracking-tight truncate">{{
                     labels.courseTitle }}</h1>
             </div>
-            <div class="flex items-center gap-2 sm:gap-3">
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                 <button @click="handleDownload"
                     class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 sm:px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-md transition-all active:scale-95">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1212,20 +1224,21 @@
                     const currentLang = lang.value; // Lấy ngôn ngữ hiện tại đang hiển thị
 
                     const html = `
-                        <html><head><meta charset='utf-8'><style>
-                        body { font-family: 'Times New Roman', serif; padding: 40pt; line-height: 1.5; }
-                        h1 { color: #1e3a8a; text-align: center; font-size: 24pt; margin-bottom: 30pt; text-transform: uppercase; }
-                        h2 { color: #2563eb; border-bottom: 2px solid #2563eb; margin-top: 30pt; padding-bottom: 5pt; }
-                        h3 { color: #16a34a; margin-top: 20pt; }
-                        h4 { color: #047857; margin-top: 15pt; font-size: 14pt; }
+                        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                        <head><meta charset='utf-8'><title>${l.courseTitle}</title><style>
+                        body { font-family: 'Times New Roman', serif; padding: 20pt; line-height: 1.5; }
+                        h1 { color: #1e3a8a; text-align: center; font-size: 24pt; margin-bottom: 20pt; text-transform: uppercase; }
+                        h2 { color: #2563eb; border-bottom: 2px solid #2563eb; margin-top: 20pt; padding-bottom: 5pt; }
+                        h3 { color: #16a34a; margin-top: 15pt; font-size: 14pt; }
+                        h4 { color: #047857; margin-top: 10pt; font-size: 12pt; font-style: italic; }
                         table { border-collapse: collapse; width: 100%; margin: 15pt 0; }
                         th, td { border: 1px solid #999; padding: 8pt; text-align: left; vertical-align: top; }
                         th { background: #f3f4f6; font-weight: bold; }
-                        pre { background: #f8fafc; padding: 15pt; border: 1px solid #cbd5e1; font-family: 'Courier New', monospace; font-size: 10.5pt; white-space: pre-wrap; }
+                        pre { background: #f8fafc; padding: 15pt; border: 1px solid #cbd5e1; font-family: 'Courier New', Courier, monospace; font-size: 10.5pt; white-space: pre-wrap; word-wrap: break-word; }
                         .output-pre { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: bold; }
                         ul { margin-bottom: 15pt; }
                         li { margin-bottom: 5pt; }
-                        code { background-color: #f1f5f9; padding: 2px 4px; font-family: monospace; }
+                        code { background-color: #f1f5f9; padding: 2px 4px; font-family: monospace; border: 1px solid #e2e8f0; }
                         </style></head><body>
                         <h1>${l.courseTitle}</h1>
                         ${courseData.map(ch => `
@@ -1242,7 +1255,9 @@
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
                     a.download = l.filename; // Sử dụng tên file theo ngôn ngữ
+                    document.body.appendChild(a);
                     a.click();
+                    document.body.removeChild(a);
                     URL.revokeObjectURL(a.href); // Xóa URL khỏi bộ nhớ
                 };
 
