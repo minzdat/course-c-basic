@@ -137,7 +137,7 @@
 </head>
 
 <body class="text-slate-900">
-    <!-- APP CONTAINER: Cố định 100vh để chống cuộn trang web, tạo scroll cục bộ -->
+    <!-- APP CONTAINER -->
     <div id="app" v-cloak class="h-screen flex flex-col overflow-hidden bg-slate-50">
 
         <!-- MOBILE SIDEBAR -->
@@ -277,51 +277,64 @@
                                     {{ labels.example }}
                                 </h3>
 
-                                <div
-                                    class="bg-[#0f172a] rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
-                                    <div class="flex flex-wrap bg-slate-800/50 p-2 gap-2">
-                                        <button @click="activeTab = 'code'"
-                                            :class="['px-6 py-3 rounded-2xl text-[11px] font-black tracking-widest transition-all', activeTab === 'code' ? 'bg-slate-900 text-blue-400 shadow-lg' : 'text-slate-400 hover:text-slate-200']">
-                                            MAIN.C
-                                        </button>
-                                        <button @click="activeTab = 'output'"
-                                            :class="['px-6 py-3 rounded-2xl text-[11px] font-black tracking-widest transition-all', activeTab === 'output' ? 'bg-slate-900 text-emerald-400 shadow-lg' : 'text-slate-400 hover:text-slate-200']">
-                                            {{ labels.outputTab.toUpperCase() }}
-                                        </button>
-                                        <div class="flex-1 min-w-[20px]"></div>
-                                        <button v-if="activeTab === 'code'" @click="activeTab = 'output'"
-                                            class="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-[11px] font-black flex items-center gap-2 active:scale-95 transition-all shadow-lg shadow-blue-900/20">
-                                            <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
-                                                <path d="M8 5v14l11-7z"></path>
-                                            </svg> {{ labels.runBtn.toUpperCase() }}
-                                        </button>
-                                    </div>
-                                    <div
-                                        class="p-6 sm:p-8 text-slate-300 font-mono text-[13px] sm:text-sm overflow-x-auto min-h-[200px] leading-relaxed relative group">
-                                        <!-- Nút Copy Code -->
-                                        <button v-if="activeTab === 'code'"
-                                            @click="copyCode(currentCh.codeExample.code, 'main_code')"
-                                            class="absolute top-4 right-4 bg-slate-700/80 hover:bg-slate-600 text-white px-3 py-2 rounded-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all flex items-center gap-2 text-[11px] font-bold z-10 backdrop-blur-sm shadow-md active:scale-95">
-                                            <svg v-if="!copiedStates['main_code']" class="w-3.5 h-3.5" fill="none"
-                                                stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
-                                                </path>
-                                            </svg>
-                                            <svg v-else class="w-3.5 h-3.5 text-emerald-400" fill="none"
-                                                stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M5 13l4 4L19 7"></path>
-                                            </svg>
-                                            <span v-if="copiedStates['main_code']" class="text-emerald-400">{{
-                                                labels.copiedBtn }}</span>
-                                            <span v-else>{{ labels.copyBtn }}</span>
-                                        </button>
+                                <!-- Render một hoặc nhiều khối Code Example -->
+                                <div v-for="(example, exIdx) in (currentCh.codeExamples || [currentCh.codeExample])"
+                                    :key="'ex-' + exIdx" class="mb-12">
+                                    <h4 v-if="example.title"
+                                        class="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                                        {{ example.title[lang] }}
+                                    </h4>
 
-                                        <pre
-                                            v-if="activeTab === 'code'"><code class="block">{{ currentCh.codeExample.code }}</code></pre>
-                                        <pre v-else
-                                            class="text-emerald-400 font-bold"><code class="block">{{ currentCh.codeExample.output }}</code></pre>
+                                    <div
+                                        class="bg-[#0f172a] rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
+                                        <div class="flex flex-wrap bg-slate-800/50 p-2 gap-2">
+                                            <button @click="setActiveTab(exIdx, 'code')"
+                                                :class="['px-6 py-3 rounded-2xl text-[11px] font-black tracking-widest transition-all', getActiveTab(exIdx) === 'code' ? 'bg-slate-900 text-blue-400 shadow-lg' : 'text-slate-400 hover:text-slate-200']">
+                                                MAIN.C
+                                            </button>
+                                            <button @click="setActiveTab(exIdx, 'output')"
+                                                :class="['px-6 py-3 rounded-2xl text-[11px] font-black tracking-widest transition-all', getActiveTab(exIdx) === 'output' ? 'bg-slate-900 text-emerald-400 shadow-lg' : 'text-slate-400 hover:text-slate-200']">
+                                                {{ labels.outputTab.toUpperCase() }}
+                                            </button>
+                                            <div class="flex-1 min-w-[20px]"></div>
+                                            <button v-if="getActiveTab(exIdx) === 'code'"
+                                                @click="setActiveTab(exIdx, 'output')"
+                                                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-[11px] font-black flex items-center gap-2 active:scale-95 transition-all shadow-lg shadow-blue-900/20">
+                                                <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                                                    <path d="M8 5v14l11-7z"></path>
+                                                </svg> {{ labels.runBtn.toUpperCase() }}
+                                            </button>
+                                        </div>
+                                        <div
+                                            class="p-6 sm:p-8 text-slate-300 font-mono text-[13px] sm:text-sm overflow-x-auto min-h-[200px] leading-relaxed relative group">
+                                            <!-- Nút Copy Code -->
+                                            <button v-if="getActiveTab(exIdx) === 'code'"
+                                                @click="copyCode(example.code, 'main_code_' + exIdx)"
+                                                class="absolute top-4 right-4 bg-slate-700/80 hover:bg-slate-600 text-white px-3 py-2 rounded-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all flex items-center gap-2 text-[11px] font-bold z-10 backdrop-blur-sm shadow-md active:scale-95">
+                                                <svg v-if="!copiedStates['main_code_' + exIdx]" class="w-3.5 h-3.5"
+                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                                    </path>
+                                                </svg>
+                                                <svg v-else class="w-3.5 h-3.5 text-emerald-400" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                                <span v-if="copiedStates['main_code_' + exIdx]"
+                                                    class="text-emerald-400">{{
+                                                    labels.copiedBtn }}</span>
+                                                <span v-else>{{ labels.copyBtn }}</span>
+                                            </button>
+
+                                            <pre
+                                                v-if="getActiveTab(exIdx) === 'code'"><code class="block">{{ example.code }}</code></pre>
+                                            <pre v-else
+                                                class="text-emerald-400 font-bold"><code class="block">{{ example.output }}</code></pre>
+                                        </div>
                                     </div>
                                 </div>
                             </section>
@@ -431,11 +444,14 @@
         createApp({
             setup() {
                 const lang = ref('vi');
-                const currentIndex = ref(0); // Thay đổi mặc định mở ở Chương 1
-                const activeTab = ref('code');
+                const currentIndex = ref(0);
+                const activeTabs = ref({});
                 const isMobileMenuOpen = ref(false);
                 const solutions = ref({});
                 const copiedStates = ref({});
+
+                const getActiveTab = (idx) => activeTabs.value[idx] || 'code';
+                const setActiveTab = (idx, tab) => activeTabs.value[idx] = tab;
 
                 const copyCode = (text, id) => {
                     const el = document.createElement('textarea');
@@ -512,6 +528,14 @@
                                         <tr><td><code>\\"</code></td><td>In ra dấu ngoặc kép</td><td><code>printf("\\"Hello\\"");</code></td></tr>
                                     </tbody>
                                 </table>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">1.4. Hằng số (Symbolic Constants - #define)</h4>
+                                <p>Bên cạnh biến, chúng ta thường sử dụng các giá trị cố định không bao giờ thay đổi trong suốt chương trình (ví dụ: số PI = 3.14159). Thay vì viết trực tiếp con số này nhiều lần, ta có thể định nghĩa nó bằng chỉ thị <code>#define</code>.</p>
+                                <ul>
+                                    <li>Cú pháp: <code>#define TÊN_HẰNG_SỐ giá_trị</code> (Lưu ý: Không có dấu <code>=</code> và không có dấu <code>;</code> ở cuối).</li>
+                                    <li>Theo quy ước, tên hằng số thường được viết HOA toàn bộ để dễ phân biệt với biến thông thường.</li>
+                                </ul>
+                                <p>Ví dụ: <code>#define PI 3.14159</code></p>
                             </div>`,
                             en: `<div>
                                 <h4 class="font-bold text-blue-700 text-lg mb-3">1.1. Program Structure and Header Files</h4>
@@ -563,16 +587,27 @@
                                         <tr><td><code>\\"</code></td><td>Print double quote</td><td><code>printf("\\"Hello\\"");</code></td></tr>
                                     </tbody>
                                 </table>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">1.4. Symbolic Constants (#define)</h4>
+                                <p>Besides variables, we often use fixed values that never change throughout the program (e.g., PI = 3.14159). Instead of writing this number directly multiple times, we can define it using the <code>#define</code> directive.</p>
+                                <ul>
+                                    <li>Syntax: <code>#define CONSTANT_NAME value</code> (Note: No <code>=</code> sign and no <code>;</code> at the end).</li>
+                                    <li>By convention, constant names are written entirely in UPPERCASE to distinguish them from regular variables.</li>
+                                </ul>
+                                <p>Example: <code>#define PI 3.14159</code></p>
                             </div>`
                         },
-                        codeExample: {
-                            code: `#include <stdio.h> // Thư viện nhập xuất chuẩn\n\nint main() {\n    int age;\n    float weight = 55.5;\n    \n    printf("Nhap tuoi cua ban: ");\n    scanf("%d", &age); // Nhập số nguyên\n    \n    // Xuất ra màn hình, %.1f để in 1 chữ số thập phân\n    // Sử dụng \\n để xuống dòng\n    printf("Ban %d tuoi, nang %.1f kg.\\n", age, weight);\n    \n    // Ví dụ getchar() và putchar()\n    printf("Nhap mot ky tu bat ky: ");\n    getchar(); // Đọc bỏ ký tự Enter từ lệnh scanf trước đó\n    char c = getchar();\n    printf("Ky tu vua nhap la: ");\n    putchar(c);\n    \n    return 0;\n}`,
-                            output: `Nhap tuoi cua ban: 15\nBan 15 tuoi, nang 55.5 kg.\nNhap mot ky tu bat ky: A\nKy tu vua nhap la: A`
-                        },
+                        codeExamples: [
+                            {
+                                title: { vi: "Ví dụ 1: Mã nguồn", en: "Example 1: Source code" },
+                                code: `#include <stdio.h> // Standard I/O library\n\n#define MAX_WEIGHT 150.0 // Symbolic constant\n#define YEAR 2024\n\nint main() {\n    int age;\n    float weight = 55.5;\n    \n    printf("Enter your age in %d: ", YEAR);\n    scanf("%d", &age); // Input integer\n    \n    // Output to screen, %.1f to print 1 decimal place\n    // Use \\n for new line\n    printf("You are %d years old, weighing %.1f kg.\\n", age, weight);\n    printf("Maximum allowed weight is %.1f kg.\\n", MAX_WEIGHT);\n    \n    // Example of getchar() and putchar()\n    printf("Enter any character: ");\n    getchar(); // Consume the Enter character from the previous scanf\n    char c = getchar();\n    printf("The character you entered is: ");\n    putchar(c);\n    \n    return 0;\n}`,
+                                output: `Enter your age in 2024: 15\nYou are 15 years old, weighing 55.5 kg.\nMaximum allowed weight is 150.0 kg.\nEnter any character: A\nThe character you entered is: A`
+                            }
+                        ],
                         exercises: [
-                            { id: "Bài 1.1", title: { vi: "Thông tin cá nhân (Dễ)", en: "Personal Info (Easy)" }, desc: { vi: "Viết chương trình in ra màn hình thông tin của bản thân gồm: Họ tên (dùng ký tự/chuỗi đơn giản hoặc in cứng), Lớp, và Tuổi. Yêu cầu sử dụng ký tự xuống dòng (\\n) và tab (\\t).", en: "Write a program to print your personal information to the screen including: Full Name, Class, and Age. Require the use of new line (\\n) and tab (\\t) escape characters." }, io: { vi: "Output:\nHo ten:\tNguyen Van A\nLop:\t8A1\nTuoi:\t14", en: "Output:\nName:\tJohn Doe\nClass:\t8A1\nAge:\t14" }, solution: `#include <stdio.h>\n\nint main() {\n    printf("Ho ten:\\tNguyen Van A\\n");\n    printf("Lop:\\t8A1\\n");\n    printf("Tuoi:\\t14\\n");\n    return 0;\n}` },
-                            { id: "Bài 1.2", title: { vi: "Chu vi & Diện tích (TB)", en: "Rectangle Area (Med)" }, desc: { vi: "Viết chương trình yêu cầu người dùng nhập chiều dài và chiều rộng của một hình chữ nhật (kiểu float). Tính và in ra chu vi, diện tích.", en: "Write a program asking the user to input the length and width of a rectangle (float type). Calculate and print the perimeter and area." }, io: { vi: "Input: 5.0 3.0\nOutput:\nChu vi: 16.00\nDien tich: 15.00", en: "Input: 5.0 3.0\nOutput:\nPerimeter: 16.00\nArea: 15.00" }, solution: `#include <stdio.h>\n\nint main() {\n    float dai, rong, chuVi, dienTich;\n    printf("Nhap chieu dai, chieu rong: ");\n    scanf("%f %f", &dai, &rong);\n    \n    chuVi = (dai + rong) * 2;\n    dienTich = dai * rong;\n    \n    printf("Chu vi: %.2f\\n", chuVi);\n    printf("Dien tich: %.2f\\n", dienTich);\n    return 0;\n}` },
-                            { id: "Bài 1.3", title: { vi: "Đổi C sang F (Khó)", en: "Celsius to Fahrenheit (Hard)" }, desc: { vi: "Viết chương trình nhập nhiệt độ theo thang độ C (Celsius). Đổi và in ra nhiệt độ Fahrenheit (F) theo công thức: F = C * 1.8 + 32.", en: "Write a program to input a temperature in Celsius. Convert and print the Fahrenheit (F) temperature using the formula: F = C * 1.8 + 32." }, io: { vi: "Input: 30\nOutput: Nhiet do F: 86.00", en: "Input: 30\nOutput: Temp in F: 86.00" }, solution: `#include <stdio.h>\n\nint main() {\n    float c, f;\n    printf("Nhap nhiet do C: ");\n    scanf("%f", &c);\n    \n    f = c * 1.8 + 32;\n    printf("Nhiet do F: %.2f\\n", f);\n    return 0;\n}` }
+                            { id: "Bài 1.1", title: { vi: "Thông tin cá nhân (Dễ)", en: "Personal Info (Easy)" }, desc: { vi: "Viết chương trình in ra màn hình thông tin của bản thân gồm: Họ tên (dùng ký tự/chuỗi đơn giản hoặc in cứng), Lớp, và Tuổi. Yêu cầu sử dụng ký tự xuống dòng (\\n) và tab (\\t).", en: "Write a program to print your personal information to the screen including: Full Name, Class, and Age. Require the use of new line (\\n) and tab (\\t) escape characters." }, io: { vi: "Output:\nFull Name:\tJohn Doe\nClass:\t8A1\nAge:\t14", en: "Output:\nFull Name:\tJohn Doe\nClass:\t8A1\nAge:\t14" }, solution: `#include <stdio.h>\n\nint main() {\n    printf("Full Name:\\tJohn Doe\\n");\n    printf("Class:\\t8A1\\n");\n    printf("Age:\\t14\\n");\n    return 0;\n}` },
+                            { id: "Bài 1.2", title: { vi: "Chu vi & Diện tích (TB)", en: "Rectangle Area (Med)" }, desc: { vi: "Viết chương trình yêu cầu người dùng nhập chiều dài và chiều rộng của một hình chữ nhật (kiểu float). Tính và in ra chu vi, diện tích.", en: "Write a program asking the user to input the length and width of a rectangle (float type). Calculate and print the perimeter and area." }, io: { vi: "Input: 5.0 3.0\nOutput:\nPerimeter: 16.00\nArea: 15.00", en: "Input: 5.0 3.0\nOutput:\nPerimeter: 16.00\nArea: 15.00" }, solution: `#include <stdio.h>\n\nint main() {\n    float length, width, perimeter, area;\n    printf("Enter length and width: ");\n    scanf("%f %f", &length, &width);\n    \n    perimeter = (length + width) * 2;\n    area = length * width;\n    \n    printf("Perimeter: %.2f\\n", perimeter);\n    printf("Area: %.2f\\n", area);\n    return 0;\n}` },
+                            { id: "Bài 1.3", title: { vi: "Đổi C sang F (Khó)", en: "Celsius to Fahrenheit (Hard)" }, desc: { vi: "Viết chương trình nhập nhiệt độ theo thang độ C (Celsius). Đổi và in ra nhiệt độ Fahrenheit (F) theo công thức: F = C * 1.8 + 32.", en: "Write a program to input a temperature in Celsius. Convert and print the Fahrenheit (F) temperature using the formula: F = C * 1.8 + 32." }, io: { vi: "Input: 30\nOutput:\nTemperature in Fahrenheit: 86.00", en: "Input: 30\nOutput:\nTemperature in Fahrenheit: 86.00" }, solution: `#include <stdio.h>\n\nint main() {\n    float c, f;\n    printf("Enter temperature in Celsius: ");\n    scanf("%f", &c);\n    \n    f = c * 1.8 + 32;\n    printf("Temperature in Fahrenheit: %.2f\\n", f);\n    return 0;\n}` }
                         ]
                     },
                     {
@@ -699,14 +734,17 @@
                                 </ul>
                             </div>`
                         },
-                        codeExample: {
-                            code: `#include <stdio.h>\n\nint main() {\n    // === 1. Shorthand và Tăng/Giảm ===\n    int i = 0, j = 0;\n    int x, y;\n    x = ++i; // i tăng thành 1, x = 1\n    y = j++; // y = 0, j tăng thành 1\n    printf("Tien to: x=%d, i=%d\\n", x, i);\n    printf("Hau to: y=%d, j=%d\\n\\n", y, j);\n\n    // === 2. Thao tác Bit (Bitwise) ===\n    int a = 11; // Nhị phân: 0000 1011\n    int b = 17; // Nhị phân: 0001 0001\n    printf("=== BITWISE ===\\n");\n    printf("%d << 2 = %d\\n", a, a << 2);\n    printf("%d >> 3 = %d\\n", b, b >> 3);\n    printf("%d & %d = %d\\n\\n", a, b, a & b);\n\n    // === 3. Ép kiểu (Type Casting) ===\n    double c = 3.5;\n    double d = 2.7;\n    printf("=== EP KIEU ===\\n");\n    printf("c * d = %f\\n", c * d);\n    printf("(int)(c * d) = %d\\n", (int)(c * d));\n    \n    return 0;\n}`,
-                            output: `Tien to: x=1, i=1\nHau to: y=0, j=1\n\n=== BITWISE ===\n11 << 2 = 44\n17 >> 3 = 2\n11 & 17 = 1\n\n=== EP KIEU ===\nc * d = 9.450000\n(int)(c * d) = 9`
-                        },
+                        codeExamples: [
+                            {
+                                title: { vi: "Ví dụ 1: Toán tử", en: "Example 1: Operators" },
+                                code: `#include <stdio.h>\n\nint main() {\n    // === 1. Shorthand and Increment/Decrement ===\n    int i = 0, j = 0;\n    int x, y;\n    x = ++i; // i becomes 1, x = 1\n    y = j++; // y = 0, j becomes 1\n    printf("Prefix: x=%d, i=%d\\n", x, i);\n    printf("Postfix: y=%d, j=%d\\n\\n", y, j);\n\n    // === 2. Bitwise Operations ===\n    int a = 11; // Binary: 0000 1011\n    int b = 17; // Binary: 0001 0001\n    printf("=== BITWISE ===\\n");\n    printf("%d << 2 = %d\\n", a, a << 2);\n    printf("%d >> 3 = %d\\n", b, b >> 3);\n    printf("%d & %d = %d\\n\\n", a, b, a & b);\n\n    // === 3. Type Casting ===\n    double c = 3.5;\n    double d = 2.7;\n    printf("=== TYPE CASTING ===\\n");\n    printf("c * d = %f\\n", c * d);\n    printf("(int)(c * d) = %d\\n", (int)(c * d));\n    \n    return 0;\n}`,
+                                output: `Prefix: x=1, i=1\nPostfix: y=0, j=1\n\n=== BITWISE ===\n11 << 2 = 44\n17 >> 3 = 2\n11 & 17 = 1\n\n=== TYPE CASTING ===\nc * d = 9.450000\n(int)(c * d) = 9`
+                            }
+                        ],
                         exercises: [
-                            { id: "Bài 2.1", title: { vi: "Tính thuế VAT (Dễ)", en: "VAT Calculation (Easy)" }, desc: { vi: "Nhập giá tiền hóa đơn mua hàng. Tính số tiền thuế VAT (10%) và tổng tiền phải trả. Yêu cầu sử dụng toán tử gán rút gọn (+=) để tính tổng tiền.", en: "Input bill amount. Calculate 10% VAT and total. Require using shorthand operator (+=) for total." }, io: { vi: "Input: 1000\nOutput:\nThue VAT: 100.00\nTong thanh toan: 1100.00", en: "Input: 1000\nOutput:\nVAT: 100.00\nTotal: 1100.00" }, solution: `#include <stdio.h>\n\nint main() {\n    float bill, vat;\n    printf("Nhap so tien hoa don: ");\n    scanf("%f", &bill);\n    \n    vat = bill * 0.1;\n    bill += vat; // Sử dụng += thay vì bill = bill + vat\n    \n    printf("Thue VAT: %.2f\\n", vat);\n    printf("Tong thanh toan: %.2f\\n", bill);\n    return 0;\n}` },
-                            { id: "Bài 2.2", title: { vi: "Dịch bit (TB)", en: "Bit Shifting (Med)" }, desc: { vi: "Nhập một số nguyên n. Sử dụng toán tử dịch trái (<<) để tính n nhân với 8, và dịch phải (>>) để tính n chia cho 4. In kết quả ra màn hình.", en: "Input integer n. Use left shift (<<) to multiply by 8, and right shift (>>) to divide by 4. Print results." }, io: { vi: "Input: 16\nOutput:\n16 nhan 8 = 128\n16 chia 4 = 4", en: "Input: 16\nOutput:\n16 x 8 = 128\n16 / 4 = 4" }, solution: `#include <stdio.h>\n\nint main() {\n    int n;\n    printf("Nhap so nguyen n: ");\n    scanf("%d", &n);\n    \n    // Dịch trái 3 bit tương đương nhân 2^3 = 8\n    int nhan8 = n << 3;\n    \n    // Dịch phải 2 bit tương đương chia 2^2 = 4\n    int chia4 = n >> 2;\n    \n    printf("%d nhan 8 = %d\\n", n, nhan8);\n    printf("%d chia 4 = %d\\n", n, chia4);\n    return 0;\n}` },
-                            { id: "Bài 2.3", title: { vi: "Đổi giây sang H:M:S (Khó)", en: "Seconds to H:M:S (Hard)" }, desc: { vi: "Nhập vào một tổng số giây (VD: 3665). Viết chương trình chuyển đổi thành định dạng Giờ : Phút : Giây. Dùng toán tử / và %.", en: "Input a total number of seconds (e.g., 3665). Write a program to convert it to Hours : Minutes : Seconds format using / and % operators." }, io: { vi: "Input: 3665\nOutput: 1 gio 1 phut 5 giay", en: "Input: 3665\nOutput: 1 hours 1 minutes 5 seconds" }, solution: `#include <stdio.h>\n\nint main() {\n    int tongGiay, gio, phut, giay;\n    printf("Nhap tong so giay: ");\n    scanf("%d", &tongGiay);\n    \n    gio = tongGiay / 3600;\n    phut = (tongGiay % 3600) / 60;\n    giay = (tongGiay % 3600) % 60;\n    \n    printf("%d gio %d phut %d giay\\n", gio, phut, giay);\n    return 0;\n}` }
+                            { id: "Bài 2.1", title: { vi: "Tính thuế VAT (Dễ)", en: "VAT Calculation (Easy)" }, desc: { vi: "Nhập giá tiền hóa đơn mua hàng. Tính số tiền thuế VAT (10%) và tổng tiền phải trả. Yêu cầu sử dụng toán tử gán rút gọn (+=) để tính tổng tiền.", en: "Input bill amount. Calculate 10% VAT and total. Require using shorthand operator (+=) for total." }, io: { vi: "Input: 1000\nOutput:\nVAT: 100.00\nTotal payment: 1100.00", en: "Input: 1000\nOutput:\nVAT: 100.00\nTotal payment: 1100.00" }, solution: `#include <stdio.h>\n\nint main() {\n    float bill, vat;\n    printf("Enter bill amount: ");\n    scanf("%f", &bill);\n    \n    vat = bill * 0.1;\n    bill += vat; // Use += instead of bill = bill + vat\n    \n    printf("VAT: %.2f\\n", vat);\n    printf("Total payment: %.2f\\n", bill);\n    return 0;\n}` },
+                            { id: "Bài 2.2", title: { vi: "Dịch bit (TB)", en: "Bit Shifting (Med)" }, desc: { vi: "Nhập một số nguyên n. Sử dụng toán tử dịch trái (<<) để tính n nhân với 8, và dịch phải (>>) để tính n chia cho 4. In kết quả ra màn hình.", en: "Input integer n. Use left shift (<<) to multiply by 8, and right shift (>>) to divide by 4. Print results." }, io: { vi: "Input: 16\nOutput:\n16 times 8 = 128\n16 divided by 4 = 4", en: "Input: 16\nOutput:\n16 times 8 = 128\n16 divided by 4 = 4" }, solution: `#include <stdio.h>\n\nint main() {\n    int n;\n    printf("Enter integer n: ");\n    scanf("%d", &n);\n    \n    // Left shift 3 bits is equivalent to multiplying by 2^3 = 8\n    int mul8 = n << 3;\n    \n    // Right shift 2 bits is equivalent to dividing by 2^2 = 4\n    int div4 = n >> 2;\n    \n    printf("%d times 8 = %d\\n", n, mul8);\n    printf("%d divided by 4 = %d\\n", n, div4);\n    return 0;\n}` },
+                            { id: "Bài 2.3", title: { vi: "Đổi giây sang H:M:S (Khó)", en: "Seconds to H:M:S (Hard)" }, desc: { vi: "Nhập vào một tổng số giây (VD: 3665). Viết chương trình chuyển đổi thành định dạng Giờ : Phút : Giây. Dùng toán tử / và %.", en: "Input a total number of seconds (e.g., 3665). Write a program to convert it to Hours : Minutes : Seconds format using / and % operators." }, io: { vi: "Input: 3665\nOutput: 1 hours 1 minutes 5 seconds", en: "Input: 3665\nOutput: 1 hours 1 minutes 5 seconds" }, solution: `#include <stdio.h>\n\nint main() {\n    int totalSec, h, m, s;\n    printf("Enter total seconds: ");\n    scanf("%d", &totalSec);\n    \n    h = totalSec / 3600;\n    m = (totalSec % 3600) / 60;\n    s = (totalSec % 3600) % 60;\n    \n    printf("%d hours %d minutes %d seconds\\n", h, m, s);\n    return 0;\n}` }
                         ]
                     },
                     {
@@ -717,7 +755,7 @@
                         },
                         theory: {
                             vi: `<div>
-                                <h4 class="font-bold text-blue-700 text-lg mb-3">3.1. Rẽ nhánh (if-else, switch)</h4>
+                                <h4 class="font-bold text-blue-700 text-lg mb-3">3.1. Rẽ nhánh (if-else, switch, goto)</h4>
                                 <p>Câu lệnh rẽ nhánh được dùng kết hợp với các điều kiện so sánh và logic:</p>
                                 <table>
                                     <thead><tr><th>Nhóm</th><th>Toán tử</th><th>Ý nghĩa</th></tr></thead>
@@ -740,7 +778,8 @@
                                     <strong>Giá trị Đúng/Sai trong C:</strong> Trong C, bất kỳ số nào <strong>khác 0</strong> đều được hiểu là Đúng (True, thường là 1). Chỉ số <strong>0</strong> mới là Sai (False). Do đó biểu thức <code>(10 &lt; 11)</code> sẽ trả về kết quả là <code>1</code>.
                                 </p>
                                 <ul>
-                                    <li><strong>switch-case:</strong> Dùng khi xét biến có nhiều giá trị cụ thể. Chú ý phải có <code>break</code> để thoát nhánh và <code>default</code> cho trường hợp ngoại lệ.</li>
+                                    <li><strong>switch-case:</strong> Dùng khi xét biến có nhiều giá trị cụ thể. Chú ý phải có <code>break</code> để thoát khỏi luồng nhánh, và <code>default</code> cho các trường hợp ngoại lệ.</li>
+                                    <li><strong>goto:</strong> Lệnh nhảy vô điều kiện đến một nhãn (label). Cần hạn chế sử dụng vì dễ làm phá vỡ luồng logic, nhưng lại rất tiện lợi khi cần thoát khỏi nhiều vòng lặp lồng nhau.</li>
                                 </ul>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">3.2. Vòng lặp (while, do-while, for)</h4>
@@ -759,7 +798,7 @@
                                 <p>Là vòng lặp chạy mãi mãi không tự dừng do điều kiện luôn Đúng. Thường được viết dưới dạng <code>while (1)</code> hoặc <code>for (;;)</code>. Để thoát khỏi vòng lặp này, ta phải sử dụng lệnh lệnh <code>break;</code> kết hợp với <code>if</code> bên trong thân vòng lặp.</p>
                             </div>`,
                             en: `<div>
-                                <h4 class="font-bold text-blue-700 text-lg mb-3">3.1. Branching (if-else, switch)</h4>
+                                <h4 class="font-bold text-blue-700 text-lg mb-3">3.1. Branching (if-else, switch, goto)</h4>
                                 <p>Branching statements are used with comparison and logical operators:</p>
                                 <table>
                                     <thead><tr><th>Group</th><th>Operator</th><th>Meaning</th></tr></thead>
@@ -783,6 +822,7 @@
                                 </p>
                                 <ul>
                                     <li><strong>switch-case:</strong> Used for testing a variable against specific values. Remember to use <code>break</code> to exit a case and <code>default</code> for unhandled cases.</li>
+                                    <li><strong>goto:</strong> Unconditional jump to a label. Should be used sparingly as it can break logical flow, but useful for breaking out of deeply nested loops.</li>
                                 </ul>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">3.2. Loops (while, do-while, for)</h4>
@@ -801,15 +841,23 @@
                                 <p>A loop that runs forever because its condition is always True. Typically written as <code>while (1)</code> or <code>for (;;)</code>. To break out of this loop, you must use a <code>break;</code> statement combined with an <code>if</code> condition inside the loop body.</p>
                             </div>`
                         },
-                        codeExample: {
-                            code: `#include <stdio.h>\n\nint main() {\n    // === 1. Toán tử 3 ngôi (Ternary) ===\n    int x = 10, y = 20;\n    int max = (x > y) ? x : y; \n    printf("Max cua 10 va 20 la: %d\\n\\n", max);\n\n    // === 2. Vòng lặp lồng nhau (Nested Loop) ===\n    printf("In hinh chu nhat 2x3:\\n");\n    for (int i = 1; i <= 2; i++) {\n        for (int j = 1; j <= 3; j++) {\n            printf("* ");\n        }\n        printf("\\n"); // Xuống dòng sau mỗi hàng\n    }\n\n    // === 3. Vòng lặp vô hạn và break ===\n    int count = 0;\n    while (1) {\n        count++;\n        if (count == 3) {\n            printf("\\nThoat vong lap vo han tai count = 3\\n");\n            break;\n        }\n    }\n    return 0;\n}`,
-                            output: `Max cua 10 va 20 la: 20\n\nIn hinh chu nhat 2x3:\n* * * \n* * * \n\nThoat vong lap vo han tai count = 3`
-                        },
+                        codeExamples: [
+                            {
+                                title: { vi: "Ví dụ 1: Các lệnh Rẽ nhánh (Branching)", en: "Example 1: Branching Statements" },
+                                code: `#include <stdio.h>\n\nint main() {\n    int score = 85;\n    int age = 20;\n\n    // 1. if-else with logical operators\n    printf("--- IF-ELSE & LOGIC ---\\n");\n    if (score >= 80 && age >= 18) {\n        printf("Eligible for the scholarship.\\n");\n    } else if (score >= 50 || age < 18) {\n        printf("Waitlisted.\\n");\n    } else {\n        printf("Not eligible.\\n");\n    }\n\n    // 2. Ternary Operator\n    printf("\\n--- TERNARY OPERATOR ---\\n");\n    int max = (score > 50) ? score : 50;\n    printf("Max value is: %d\\n", max);\n\n    // 3. switch-case with break and default\n    printf("\\n--- SWITCH CASE ---\\n");\n    char grade = 'B';\n    switch (grade) {\n        case 'A':\n            printf("Excellent!\\n");\n            break;\n        case 'B':\n        case 'C':\n            printf("Well done!\\n");\n            break;\n        default:\n            printf("Invalid grade.\\n");\n            break;\n    }\n\n    // 4. goto statement\n    printf("\\n--- GOTO STATEMENT ---\\n");\n    if (score > 80) {\n        goto success; // Jump directly to the 'success' label\n    }\n    printf("This line is skipped if score > 80.\\n");\n    \nsuccess:\n    printf("Goto successfully jumped here!\\n");\n\n    return 0;\n}`,
+                                output: `--- IF-ELSE & LOGIC ---\nEligible for the scholarship.\n\n--- TERNARY OPERATOR ---\nMax value is: 85\n\n--- SWITCH CASE ---\nWell done!\n\n--- GOTO STATEMENT ---\nGoto successfully jumped here!`
+                            },
+                            {
+                                title: { vi: "Ví dụ 2: Các lệnh Vòng lặp (Loops)", en: "Example 2: Loop Statements" },
+                                code: `#include <stdio.h>\n\nint main() {\n    // 1. for loop with continue\n    printf("--- FOR LOOP & CONTINUE ---\\n");\n    for (int i = 1; i <= 5; i++) {\n        if (i == 3) {\n            printf("Skip 3\\n");\n            continue; // Skip the rest of the loop body for i=3\n        }\n        printf("Iteration: %d\\n", i);\n    }\n\n    // 2. while loop with break\n    printf("\\n--- WHILE LOOP & BREAK ---\\n");\n    int count = 1;\n    while (count <= 10) {\n        if (count == 4) {\n            printf("Break at 4\\n");\n            break; // Exit the loop completely\n        }\n        printf("Count: %d\\n", count);\n        count++;\n    }\n\n    // 3. do-while loop\n    printf("\\n--- DO-WHILE LOOP ---\\n");\n    int number = 0;\n    do {\n        printf("This executes at least once. Number: %d\\n", number);\n        number++;\n    } while (number < 2);\n\n    return 0;\n}`,
+                                output: `--- FOR LOOP & CONTINUE ---\nIteration: 1\nIteration: 2\nSkip 3\nIteration: 4\nIteration: 5\n\n--- WHILE LOOP & BREAK ---\nCount: 1\nCount: 2\nCount: 3\nBreak at 4\n\n--- DO-WHILE LOOP ---\nThis executes at least once. Number: 0\nThis executes at least once. Number: 1`
+                            }
+                        ],
                         exercises: [
-                            { id: "Bài 3.1", title: { vi: "Kiểm tra chẵn lẻ (Dễ)", en: "Even/Odd Check (Easy)" }, desc: { vi: "Nhập một số nguyên. Kiểm tra và in ra màn hình đó là số chẵn hay lẻ.", en: "Input an integer. Check and print to the screen whether it is even or odd." }, io: { vi: "Input: 5\nOutput: 5 la so le", en: "Input: 5\nOutput: 5 is odd" }, solution: `#include <stdio.h>\n\nint main() {\n    int n;\n    printf("Nhap so: "); \n    scanf("%d", &n);\n    \n    if (n % 2 == 0) printf("%d la so chan\\n", n);\n    else printf("%d la so le\\n", n);\n    \n    return 0;\n}` },
-                            { id: "Bài 3.2", title: { vi: "Phương trình bậc 1 (TB)", en: "Linear Equation (Med)" }, desc: { vi: "Giải phương trình bậc nhất ax + b = 0. Yêu cầu nhập a, b. Biện luận các trường hợp a=0, b=0.", en: "Solve the linear equation ax + b = 0. Prompt for a and b. Discuss cases where a=0 or b=0." }, io: { vi: "Input: 2 -4\nOutput: Nghiem la x=2.00", en: "Input: 2 -4\nOutput: x=2.00" }, solution: `#include <stdio.h>\n\nint main() {\n    float a, b;\n    printf("Nhap a, b: "); \n    scanf("%f %f", &a, &b);\n    \n    if (a == 0) {\n        if (b == 0) printf("PT vo so nghiem\\n");\n        else printf("PT vo nghiem\\n");\n    } else {\n        printf("Nghiem la x=%.2f\\n", -b / a);\n    }\n    return 0;\n}` },
-                            { id: "Bài 3.3", title: { vi: "Bảng cửu chương toàn phần (TB)", en: "Full Multiplication Table (Med)" }, desc: { vi: "Viết chương trình in ra bảng cửu chương từ 1 đến 9. Gợi ý: Dùng 2 vòng lặp lồng nhau.", en: "Write a program to print the full multiplication table from 1 to 9. Hint: Use 2 nested loops." }, io: { vi: "Output:\n1 x 1 = 1\n...\n9 x 9 = 81", en: "Output:\n1 x 1 = 1\n...\n9 x 9 = 81" }, solution: `#include <stdio.h>\n\nint main() {\n    printf("BANG CUU CHUONG TU 1 TOI 9\\n");\n    for (int i = 1; i <= 9; i++) {\n        for(int j = 1; j <= 9; j++) {\n            printf("%d x %d = %d\\n", i, j, i * j);\n        }\n        printf("\\n"); // Cách ra giữa các bảng\n    }\n    return 0;\n}` },
-                            { id: "Bài 3.4", title: { vi: "Tổng bằng Do-While (Khó)", en: "Sum using Do-While (Hard)" }, desc: { vi: "Nhập số nguyên N. Tính tổng S = 1+2+...+N. Bắt buộc lặp đến khi N >= 1 (dùng do-while ép nhập lại nếu sai).", en: "Input integer N. Calculate sum S = 1+2+...+N. Loop until a valid N >= 1 is provided using do-while." }, io: { vi: "Input: -5 (bắt nhập lại)\nInput: 3\nOutput: Tong tu 1 toi 3 la 6", en: "Input: -5 (prompts retry)\nInput: 3\nOutput: Sum from 1 to 3 is 6" }, solution: `#include <stdio.h>\n\nint main() {\n    int n, sum = 0;\n    \n    do {\n        printf("Nhap N >= 1: ");\n        scanf("%d", &n);\n    } while (n < 1);\n    \n    for (int i = 1; i <= n; i++) sum += i;\n    \n    printf("Tong tu 1 toi %d la %d\\n", n, sum);\n    return 0;\n}` }
+                            { id: "Bài 3.1", title: { vi: "Kiểm tra chẵn lẻ (Dễ)", en: "Even/Odd Check (Easy)" }, desc: { vi: "Nhập một số nguyên. Kiểm tra và in ra màn hình đó là số chẵn hay lẻ.", en: "Input an integer. Check and print to the screen whether it is even or odd." }, io: { vi: "Input: 5\nOutput: 5 la so le", en: "Input: 5\nOutput: 5 is odd" }, solution: `#include <stdio.h>\n\nint main() {\n    int n;\n    printf("Enter number: "); \n    scanf("%d", &n);\n    \n    if (n % 2 == 0) printf("%d is even\\n", n);\n    else printf("%d is odd\\n", n);\n    \n    return 0;\n}` },
+                            { id: "Bài 3.2", title: { vi: "Phương trình bậc 1 (TB)", en: "Linear Equation (Med)" }, desc: { vi: "Giải phương trình bậc nhất ax + b = 0. Yêu cầu nhập a, b. Biện luận các trường hợp a=0, b=0.", en: "Solve the linear equation ax + b = 0. Prompt for a and b. Discuss cases where a=0 or b=0." }, io: { vi: "Input: 2 -4\nOutput: Nghiem la x=2.00", en: "Input: 2 -4\nOutput: x=2.00" }, solution: `#include <stdio.h>\n\nint main() {\n    float a, b;\n    printf("Enter a, b: "); \n    scanf("%f %f", &a, &b);\n    \n    if (a == 0) {\n        if (b == 0) printf("Infinite solutions\\n");\n        else printf("No solution\\n");\n    } else {\n        printf("Solution is x=%.2f\\n", -b / a);\n    }\n    return 0;\n}` },
+                            { id: "Bài 3.3", title: { vi: "Bảng cửu chương toàn phần (TB)", en: "Full Multiplication Table (Med)" }, desc: { vi: "Viết chương trình in ra bảng cửu chương từ 1 đến 9. Gợi ý: Dùng 2 vòng lặp lồng nhau.", en: "Write a program to print the full multiplication table from 1 to 9. Hint: Use 2 nested loops." }, io: { vi: "Output:\n1 x 1 = 1\n...\n9 x 9 = 81", en: "Output:\n1 x 1 = 1\n...\n9 x 9 = 81" }, solution: `#include <stdio.h>\n\nint main() {\n    printf("MULTIPLICATION TABLE 1 TO 9\\n");\n    for (int i = 1; i <= 9; i++) {\n        for(int j = 1; j <= 9; j++) {\n            printf("%d x %d = %d\\n", i, j, i * j);\n        }\n        printf("\\n"); // Space between tables\n    }\n    return 0;\n}` },
+                            { id: "Bài 3.4", title: { vi: "Tổng bằng Do-While (Khó)", en: "Sum using Do-While (Hard)" }, desc: { vi: "Nhập số nguyên N. Tính tổng S = 1+2+...+N. Bắt buộc lặp đến khi N >= 1 (dùng do-while ép nhập lại nếu sai).", en: "Input integer N. Calculate sum S = 1+2+...+N. Loop until a valid N >= 1 is provided using do-while." }, io: { vi: "Input: -5 (bắt nhập lại)\nInput: 3\nOutput: Tong tu 1 toi 3 la 6", en: "Input: -5 (prompts retry)\nInput: 3\nOutput: Sum from 1 to 3 is 6" }, solution: `#include <stdio.h>\n\nint main() {\n    int n, sum = 0;\n    \n    do {\n        printf("Enter N >= 1: ");\n        scanf("%d", &n);\n    } while (n < 1);\n    \n    for (int i = 1; i <= n; i++) sum += i;\n    \n    printf("Sum from 1 to %d is %d\\n", n, sum);\n    return 0;\n}` }
                         ]
                     },
                     {
@@ -910,14 +958,32 @@
                                 </ul>
                             </div>`
                         },
-                        codeExample: {
-                            code: `#include <stdio.h>\n#include <math.h>\n\n// 1. Hàm Macro\n#define MAX(x,y) ((x>y)?(x):(y))\n\n// 2. Khai báo nguyên mẫu hàm (Function Prototype)\nint tinhGiaiThua(int n);\n\nint main() {\n    // Sử dụng Macro Function\n    int a = 5, b = 8;\n    int m = MAX(a, b);\n    printf("Macro MAX(%d, %d) = %d\\n", a, b, m);\n\n    // Sử dụng hàm đệ quy\n    printf("Giai thua %d! = %d\\n", 4, tinhGiaiThua(4));\n\n    // Sử dụng thư viện math.h\n    printf("Can bac hai cua 16 la: %.2f\\n", sqrt(16));\n    return 0;\n}\n\n// 3. Định nghĩa hàm Đệ quy (Recursion)\nint tinhGiaiThua(int n) {\n    if (n == 0) return 1; // Điều kiện dừng (Base case)\n    return n * tinhGiaiThua(n - 1); // Gọi lại chính mình\n}`,
-                            output: `Macro MAX(5, 8) = 8\nGiai thua 4! = 24\nCan bac hai cua 16 la: 4.00`
-                        },
+                        codeExamples: [
+                            {
+                                title: { vi: "Ví dụ 1: Macro & Thư viện Toán học", en: "Example 1: Macro & Math Library" },
+                                code: `#include <stdio.h>\n#include <math.h>\n\n// 1. Macro Function\n#define MAX(x,y) ((x>y)?(x):(y))\n\nint main() {\n    // Using Macro Function\n    int a = 5, b = 8;\n    int m = MAX(a, b);\n    printf("Macro MAX(%d, %d) = %d\\n", a, b, m);\n\n    // Using math.h library\n    printf("Square root of 16 is: %.2f\\n", sqrt(16));\n    return 0;\n}`,
+                                output: `Macro MAX(5, 8) = 8\nSquare root of 16 is: 4.00`
+                            },
+                            {
+                                title: { vi: "Ví dụ 2: Biến Cục bộ, Toàn cục và Tĩnh", en: "Example 2: Local, Global & Static Variables" },
+                                code: `#include <stdio.h>\n\n// Global variable\nint globalVar = 10;\n\nvoid testScope() {\n    // Local variable\n    int localVar = 5;\n    // Static variable (retains its value between calls)\n    static int staticVar = 5;\n\n    localVar++;\n    staticVar++;\n    globalVar++;\n\n    printf("Local: %d, Static: %d, Global: %d\\n", localVar, staticVar, globalVar);\n}\n\nint main() {\n    printf("--- First Call ---\\n");\n    testScope();\n    \n    printf("\\n--- Second Call ---\\n");\n    testScope();\n    \n    printf("\\n--- Third Call ---\\n");\n    testScope();\n\n    return 0;\n}`,
+                                output: `--- First Call ---\nLocal: 6, Static: 6, Global: 11\n\n--- Second Call ---\nLocal: 6, Static: 7, Global: 12\n\n--- Third Call ---\nLocal: 6, Static: 8, Global: 13`
+                            },
+                            {
+                                title: { vi: "Ví dụ 3: Truyền tham số (Call-by-Value)", en: "Example 3: Parameter Passing (Call-by-Value)" },
+                                code: `#include <stdio.h>\n\n// Function that tries to modify the parameter\nvoid tryToChange(int x) {\n    printf("Inside function (before change): x = %d\\n", x);\n    x = x + 10; // This only changes the local copy\n    printf("Inside function (after change): x = %d\\n", x);\n}\n\nint main() {\n    int num = 5;\n    printf("Before function call: num = %d\\n", num);\n\n    // Pass 'num' by value\n    tryToChange(num);\n\n    // 'num' remains unchanged outside the function\n    printf("After function call: num = %d\\n", num);\n\n    return 0;\n}`,
+                                output: `Before function call: num = 5\nInside function (before change): x = 5\nInside function (after change): x = 15\nAfter function call: num = 5`
+                            },
+                            {
+                                title: { vi: "Ví dụ 4: Đệ quy (Tính Giai thừa)", en: "Example 4: Recursion (Factorial)" },
+                                code: `#include <stdio.h>\n\n// Function Prototype\nint calculateFactorial(int n);\n\nint main() {\n    int num = 4;\n    printf("Factorial of %d! = %d\\n", num, calculateFactorial(num));\n    return 0;\n}\n\n// Recursive Function Definition\nint calculateFactorial(int n) {\n    if (n == 0) return 1; // Base case\n    return n * calculateFactorial(n - 1); // Recursive call\n}`,
+                                output: `Factorial of 4! = 24`
+                            }
+                        ],
                         exercises: [
-                            { id: "Bài 4.1", title: { vi: "Hàm tìm Max (Dễ)", en: "Find Max (Easy)" }, desc: { vi: "Viết hàm int findMax(int a, int b) để tìm số lớn nhất trong 2 số. Gọi hàm trong hàm main để thử nghiệm.", en: "Write function int findMax(int a, int b) to find the largest of 2 numbers. Call it in main to test." }, io: { vi: "Input: x=10, y=25\nOutput: Max la: 25", en: "Input: 10, 25\nOutput: Max is: 25" }, solution: `#include <stdio.h>\n\nint findMax(int a, int b) {\n    if (a > b) return a;\n    return b;\n}\n\nint main() {\n    int x = 10, y = 25;\n    printf("Max la: %d\\n", findMax(x, y));\n    return 0;\n}` },
+                            { id: "Bài 4.1", title: { vi: "Hàm tìm Max (Dễ)", en: "Find Max (Easy)" }, desc: { vi: "Viết hàm int findMax(int a, int b) để tìm số lớn nhất trong 2 số. Gọi hàm trong hàm main để thử nghiệm.", en: "Write function int findMax(int a, int b) to find the largest of 2 numbers. Call it in main to test." }, io: { vi: "Input: 10, 25\nOutput: Max is: 25", en: "Input: 10, 25\nOutput: Max is: 25" }, solution: `#include <stdio.h>\n\nint findMax(int a, int b) {\n    if (a > b) return a;\n    return b;\n}\n\nint main() {\n    int x = 10, y = 25;\n    printf("Max is: %d\\n", findMax(x, y));\n    return 0;\n}` },
                             { id: "Bài 4.2", title: { vi: "Dãy Fibonacci bằng Đệ quy (TB)", en: "Fibonacci Recursive (Med)" }, desc: { vi: "Cài đặt hàm tính số Fibonacci thứ n (fib(n)) bằng Đệ quy. Biết: fib(0)=0, fib(1)=1. Với n>=2 thì fib(n) = fib(n-1) + fib(n-2).", en: "Implement a recursive function for the n-th Fibonacci number. Base: fib(0)=0, fib(1)=1. For n>=2, fib(n) = fib(n-1) + fib(n-2)." }, io: { vi: "Input: N = 5\nOutput: Fibonacci(5) = 5", en: "Input: N = 5\nOutput: Fibonacci(5) = 5" }, solution: `#include <stdio.h>\n\nint fib(int n) {\n    if (n == 0) return 0;\n    if (n == 1) return 1;\n    return fib(n - 1) + fib(n - 2);\n}\n\nint main() {\n    int n = 5;\n    printf("Fibonacci(%d) = %d\\n", n, fib(n));\n    return 0;\n}` },
-                            { id: "Bài 4.3", title: { vi: "Hàm Hoán vị con trỏ (Khó)", en: "Swap Function (Hard)" }, desc: { vi: "Viết hàm void hoanVi(int *a, int *b) để tráo đổi giá trị 2 biến. Truyền địa chỉ (con trỏ) vào hàm để thấy giá trị thực sự thay đổi sau khi gọi (vượt qua Call-by-Value).", en: "Write a function void swap(int *a, int *b) to swap values of 2 variables. Pass addresses (pointers) to see actual changes after the call (overcoming Call-by-Value)." }, io: { vi: "Truoc: x=5, y=10\nSau: x=10, y=5", en: "Before: x=5, y=10\nAfter: x=10, y=5" }, solution: `#include <stdio.h>\n\nvoid hoanVi(int *a, int *b) {\n    int temp = *a;\n    *a = *b;\n    *b = temp;\n}\n\nint main() {\n    int x = 5, y = 10;\n    printf("Truoc: x=%d, y=%d\\n", x, y);\n    hoanVi(&x, &y);\n    printf("Sau: x=%d, y=%d\\n", x, y);\n    return 0;\n}` }
+                            { id: "Bài 4.3", title: { vi: "Hàm Hoán vị con trỏ (Khó)", en: "Swap Function (Hard)" }, desc: { vi: "Viết hàm void hoanVi(int *a, int *b) để tráo đổi giá trị 2 biến. Truyền địa chỉ (con trỏ) vào hàm để thấy giá trị thực sự thay đổi sau khi gọi (vượt qua Call-by-Value).", en: "Write a function void swap(int *a, int *b) to swap values of 2 variables. Pass addresses (pointers) to see actual changes after the call (overcoming Call-by-Value)." }, io: { vi: "Before: x=5, y=10\nAfter: x=10, y=5", en: "Before: x=5, y=10\nAfter: x=10, y=5" }, solution: `#include <stdio.h>\n\nvoid swap(int *a, int *b) {\n    int temp = *a;\n    *a = *b;\n    *b = temp;\n}\n\nint main() {\n    int x = 5, y = 10;\n    printf("Before: x=%d, y=%d\\n", x, y);\n    swap(&x, &y);\n    printf("After: x=%d, y=%d\\n", x, y);\n    return 0;\n}` }
                         ]
                     },
                     {
@@ -930,11 +996,53 @@
                             vi: `<div>
                                 <h4 class="font-bold text-blue-700 text-lg mb-3">5.1. Khái niệm Mảng</h4>
                                 <p>Mảng là một dãy các biến có cùng kiểu dữ liệu, lưu trữ liên tiếp trong bộ nhớ.</p>
+                                
+                                <!-- Hình ảnh minh hoạ SVG 1D -->
+                                <div class="bg-white border border-slate-200 rounded-2xl p-6 my-6 text-center shadow-sm overflow-x-auto">
+                                    <p class="text-sm font-bold text-slate-500 mb-6 uppercase tracking-widest">Minh họa Mảng 1 chiều: int arr[5] = {10, 20, 30, 40, 50};</p>
+                                    <svg viewBox="0 0 450 100" class="w-full max-w-lg mx-auto overflow-visible min-w-[350px]">
+                                        <g transform="translate(40, 30)">
+                                            <!-- Box 0 -->
+                                            <rect x="0" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="30" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">Index 0</text>
+                                            <text x="30" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-xl">10</text>
+                                            
+                                            <!-- Box 1 -->
+                                            <rect x="75" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="105" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">1</text>
+                                            <text x="105" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-xl">20</text>
+                                            
+                                            <!-- Box 2 -->
+                                            <rect x="150" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="180" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">2</text>
+                                            <text x="180" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-xl">30</text>
+                                            
+                                            <!-- Box 3 -->
+                                            <rect x="225" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="255" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">3</text>
+                                            <text x="255" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-xl">40</text>
+                                            
+                                            <!-- Box 4 -->
+                                            <rect x="300" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="330" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">4</text>
+                                            <text x="330" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-xl">50</text>
+
+                                            <!-- Tên mảng -->
+                                            <text x="-15" y="36" text-anchor="end" class="fill-slate-800 font-mono font-bold text-lg">arr</text>
+                                        </g>
+                                    </svg>
+                                </div>
+
                                 <p class="text-[0.95rem] text-blue-800 bg-blue-50 p-4 rounded-xl border-l-4 border-blue-400 font-medium my-4">Lưu ý quan trọng: Chỉ số (Index) của mảng luôn bắt đầu từ 0. Mảng có N phần tử thì index chạy từ 0 đến N-1.</p>
                                 <ul>
                                     <li>Khai báo: <code>int arr[5];</code></li>
                                     <li>Khởi tạo luôn: <code>int arr[] = {1, 3, 5, 7, 9};</code></li>
                                 </ul>
+
+                                <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl my-6">
+                                    <h5 class="text-red-800 font-bold mb-1">Cảnh báo: Khai báo int arr[];</h5>
+                                    <p class="text-red-700 text-sm">Nếu bạn chỉ viết <code>int arr[];</code> mà không chỉ định số lượng phần tử (ví dụ <code>[5]</code>) và cũng không gán giá trị khởi tạo (ví dụ <code>= {1, 2}</code>), trình biên dịch (compiler) sẽ báo lỗi ngay lập tức vì nó <strong>không biết cần cấp phát bao nhiêu byte bộ nhớ</strong> cho mảng này.</p>
+                                </div>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">5.2. Tính số lượng phần tử bằng <code>sizeof</code></h4>
                                 <p>Để biết mảng có bao nhiêu phần tử, ta chia tổng dung lượng của mảng cho dung lượng của một phần tử đầu tiên:</p>
@@ -946,23 +1054,143 @@
                                 </div>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">5.3. Mảng nhiều chiều (Multi-Dimensional Array)</h4>
-                                <p>Thường dùng mảng 2 chiều để mô phỏng Ma trận (Bảng).</p>
+                                <p>Thường dùng mảng 2 chiều để mô phỏng Ma trận (Bảng). Bản chất nó là "một mảng của các mảng".</p>
+                                
+                                <!-- Hình ảnh minh hoạ SVG 2D -->
+                                <div class="bg-white border border-slate-200 rounded-2xl p-6 my-6 text-center shadow-sm overflow-x-auto">
+                                    <p class="text-sm font-bold text-slate-500 mb-6 uppercase tracking-widest">Minh họa Ma trận 3x3: int matrix[3][3]</p>
+                                    <svg viewBox="-60 -30 300 210" class="w-full max-w-[280px] mx-auto overflow-visible">
+                                        <!-- Headers Cột -->
+                                        <text x="25" y="-10" text-anchor="middle" class="fill-slate-500 font-mono text-[13px] font-bold">Col 0</text>
+                                        <text x="85" y="-10" text-anchor="middle" class="fill-slate-500 font-mono text-[13px] font-bold">Col 1</text>
+                                        <text x="145" y="-10" text-anchor="middle" class="fill-slate-500 font-mono text-[13px] font-bold">Col 2</text>
+                                        
+                                        <!-- Headers Hàng -->
+                                        <text x="-15" y="30" text-anchor="end" class="fill-slate-500 font-mono text-[13px] font-bold">Row 0</text>
+                                        <text x="-15" y="90" text-anchor="end" class="fill-slate-500 font-mono text-[13px] font-bold">Row 1</text>
+                                        <text x="-15" y="150" text-anchor="end" class="fill-slate-500 font-mono text-[13px] font-bold">Row 2</text>
+
+                                        <!-- Row 0 -->
+                                        <rect x="0" y="0" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="25" y="30" text-anchor="middle" class="fill-blue-700 font-bold">1</text>
+                                        <rect x="60" y="0" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="85" y="30" text-anchor="middle" class="fill-blue-700 font-bold">2</text>
+                                        <rect x="120" y="0" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="145" y="30" text-anchor="middle" class="fill-blue-700 font-bold">3</text>
+
+                                        <!-- Row 1 -->
+                                        <rect x="0" y="60" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="25" y="90" text-anchor="middle" class="fill-blue-700 font-bold">4</text>
+                                        <rect x="60" y="60" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="85" y="90" text-anchor="middle" class="fill-blue-700 font-bold">5</text>
+                                        <rect x="120" y="60" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="145" y="90" text-anchor="middle" class="fill-blue-700 font-bold">6</text>
+
+                                        <!-- Row 2 -->
+                                        <rect x="0" y="120" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="25" y="150" text-anchor="middle" class="fill-blue-700 font-bold">7</text>
+                                        <rect x="60" y="120" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="85" y="150" text-anchor="middle" class="fill-blue-700 font-bold">8</text>
+                                        <rect x="120" y="120" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="145" y="150" text-anchor="middle" class="fill-blue-700 font-bold">9</text>
+                                    </svg>
+                                </div>
+
                                 <ul>
-                                    <li>Khai báo: <code>int matrix[3][3];</code> (Bảng 3 hàng, 3 cột).</li>
-                                    <li>Duyệt qua mảng 2 chiều bằng 2 vòng lặp lồng nhau (1 lặp hàng, 1 lặp cột).</li>
+                                    <li>Khai báo: <code>int matrix[3][4];</code> (Bảng 3 hàng, 4 cột).</li>
+                                    <li>Duyệt qua mảng 2 chiều bằng 2 vòng lặp lồng nhau (1 lặp hàng từ 0->2, 1 lặp cột từ 0->3).</li>
                                 </ul>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">5.4. Truyền mảng vào hàm</h4>
-                                <p>Bản chất của việc truyền mảng vào hàm là truyền <strong>địa chỉ bộ nhớ</strong> của mảng đó. Do vậy, mọi thay đổi trên các phần tử mảng bên trong hàm sẽ <strong>được giữ nguyên</strong> ở mảng gốc sau khi thoát hàm.</p>
+                                <p>Khi truyền một mảng vào hàm, bản chất C <strong>không copy toàn bộ mảng</strong> sang hàm con (vì nếu mảng có hàng triệu phần tử sẽ làm tràn bộ nhớ rất nhanh). Thay vào đó, C chỉ truyền <strong>địa chỉ của phần tử đầu tiên</strong> của mảng đó.</p>
+                                
+                                <!-- Hình ảnh minh hoạ SVG Passing Array -->
+                                <div class="bg-white border border-slate-200 rounded-2xl p-6 my-6 text-center shadow-sm overflow-x-auto">
+                                    <p class="text-sm font-bold text-slate-500 mb-6 uppercase tracking-widest">Cơ chế truyền địa chỉ (Memory Pointer)</p>
+                                    <svg viewBox="0 0 500 200" class="w-full max-w-xl mx-auto overflow-visible min-w-[450px]">
+                                        <defs>
+                                            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444" />
+                                            </marker>
+                                        </defs>
+                                        <!-- Vùng nhớ main() -->
+                                        <rect x="20" y="20" width="220" height="150" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4"/>
+                                        <text x="130" y="45" text-anchor="middle" fill="#334155" font-weight="bold">Hàm main()</text>
+                                        
+                                        <!-- Mảng trong main -->
+                                        <rect x="40" y="70" width="40" height="40" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                                        <rect x="80" y="70" width="40" height="40" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                                        <rect x="120" y="70" width="40" height="40" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                                        <rect x="160" y="70" width="40" height="40" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                                        <text x="100" y="135" text-anchor="middle" fill="#ef4444" font-family="monospace" font-size="12" font-weight="bold">Address: 0x1000</text>
+                                        <text x="100" y="60" text-anchor="middle" fill="#1e40af" font-family="monospace" font-size="14" font-weight="bold">int arr[4]</text>
+
+                                        <!-- Vùng nhớ doubleArray() -->
+                                        <rect x="300" y="20" width="180" height="150" rx="10" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="2" stroke-dasharray="4"/>
+                                        <text x="390" y="45" text-anchor="middle" fill="#065f46" font-weight="bold">Hàm doubleArray()</text>
+                                        
+                                        <!-- Biến con trỏ trong hàm -->
+                                        <rect x="340" y="70" width="100" height="40" rx="5" fill="#d1fae5" stroke="#10b981" stroke-width="2"/>
+                                        <text x="390" y="95" text-anchor="middle" fill="#047857" font-family="monospace" font-weight="bold">0x1000</text>
+                                        <text x="390" y="60" text-anchor="middle" fill="#064e3b" font-family="monospace" font-size="14" font-weight="bold">Pointer: int a[]</text>
+
+                                        <!-- Mũi tên nối -->
+                                        <path d="M 340 90 C 270 90 250 90 210 90" fill="none" stroke="#ef4444" stroke-width="3" marker-end="url(#arrow)"/>
+                                        <text x="275" y="80" text-anchor="middle" fill="#ef4444" font-weight="bold" font-size="12">Trỏ ngược về</text>
+                                    </svg>
+                                </div>
+                                <p>Do sự liên kết này, mọi thao tác sửa đổi mảng <code>a[]</code> bên trong hàm sẽ tự động tác động trực tiếp lên mảng <code>arr</code> ở hàm <code>main()</code> bên ngoài.</p>
                             </div>`,
                             en: `<div>
                                 <h4 class="font-bold text-blue-700 text-lg mb-3">5.1. Array Concept</h4>
                                 <p>An array is a sequence of variables of the same data type, stored contiguously in memory.</p>
+                                
+                                <!-- Illustration SVG 1D -->
+                                <div class="bg-white border border-slate-200 rounded-2xl p-6 my-6 text-center shadow-sm overflow-x-auto">
+                                    <p class="text-sm font-bold text-slate-500 mb-6 uppercase tracking-widest">Array Illustration: int arr[5] = {10, 20, 30, 40, 50};</p>
+                                    <svg viewBox="0 0 450 100" class="w-full max-w-lg mx-auto overflow-visible min-w-[350px]">
+                                        <g transform="translate(40, 30)">
+                                            <!-- Box 0 -->
+                                            <rect x="0" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="30" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">Index 0</text>
+                                            <text x="30" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-xl">10</text>
+                                            
+                                            <!-- Box 1 -->
+                                            <rect x="75" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="105" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">1</text>
+                                            <text x="105" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-xl">20</text>
+                                            
+                                            <!-- Box 2 -->
+                                            <rect x="150" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="180" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">2</text>
+                                            <text x="180" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-xl">30</text>
+                                            
+                                            <!-- Box 3 -->
+                                            <rect x="225" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="255" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">3</text>
+                                            <text x="255" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-xl">40</text>
+                                            
+                                            <!-- Box 4 -->
+                                            <rect x="300" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="330" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">4</text>
+                                            <text x="330" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-xl">50</text>
+
+                                            <!-- Array name -->
+                                            <text x="-15" y="36" text-anchor="end" class="fill-slate-800 font-mono font-bold text-lg">arr</text>
+                                        </g>
+                                    </svg>
+                                </div>
+
                                 <p class="text-[0.95rem] text-blue-800 bg-blue-50 p-4 rounded-xl border-l-4 border-blue-400 font-medium my-4">Important Note: Array Index always starts at 0. For an array of N elements, the index runs from 0 to N-1.</p>
                                 <ul>
                                     <li>Declaration: <code>int arr[5];</code></li>
                                     <li>Immediate Initialization: <code>int arr[] = {1, 3, 5, 7, 9};</code></li>
                                 </ul>
+
+                                <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl my-6">
+                                    <h5 class="text-red-800 font-bold mb-1">Warning: Declaring int arr[];</h5>
+                                    <p class="text-red-700 text-sm">If you write <code>int arr[];</code> without specifying the size (e.g., <code>[5]</code>) and without immediate initialization (e.g., <code>= {1, 2}</code>), the compiler will throw an error because it <strong>does not know how many bytes of memory to allocate</strong> for this array.</p>
+                                </div>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">5.2. Calculating Array Size using <code>sizeof</code></h4>
                                 <p>To find the number of elements in an array, divide the total size of the array by the size of its first element:</p>
@@ -974,24 +1202,125 @@
                                 </div>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">5.3. Multi-Dimensional Arrays</h4>
-                                <p>Typically, 2D arrays are used to simulate Matrices (Tables).</p>
+                                <p>Typically, 2D arrays are used to simulate Matrices (Tables). It is essentially an "array of arrays".</p>
+                                
+                                <!-- Illustration SVG 2D -->
+                                <div class="bg-white border border-slate-200 rounded-2xl p-6 my-6 text-center shadow-sm overflow-x-auto">
+                                    <p class="text-sm font-bold text-slate-500 mb-6 uppercase tracking-widest">3x3 Matrix Illustration: int matrix[3][3]</p>
+                                    <svg viewBox="-60 -30 300 210" class="w-full max-w-[280px] mx-auto overflow-visible">
+                                        <!-- Column Headers -->
+                                        <text x="25" y="-10" text-anchor="middle" class="fill-slate-500 font-mono text-[13px] font-bold">Col 0</text>
+                                        <text x="85" y="-10" text-anchor="middle" class="fill-slate-500 font-mono text-[13px] font-bold">Col 1</text>
+                                        <text x="145" y="-10" text-anchor="middle" class="fill-slate-500 font-mono text-[13px] font-bold">Col 2</text>
+                                        
+                                        <!-- Row Headers -->
+                                        <text x="-15" y="30" text-anchor="end" class="fill-slate-500 font-mono text-[13px] font-bold">Row 0</text>
+                                        <text x="-15" y="90" text-anchor="end" class="fill-slate-500 font-mono text-[13px] font-bold">Row 1</text>
+                                        <text x="-15" y="150" text-anchor="end" class="fill-slate-500 font-mono text-[13px] font-bold">Row 2</text>
+
+                                        <!-- Row 0 -->
+                                        <rect x="0" y="0" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="25" y="30" text-anchor="middle" class="fill-blue-700 font-bold">1</text>
+                                        <rect x="60" y="0" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="85" y="30" text-anchor="middle" class="fill-blue-700 font-bold">2</text>
+                                        <rect x="120" y="0" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="145" y="30" text-anchor="middle" class="fill-blue-700 font-bold">3</text>
+
+                                        <!-- Row 1 -->
+                                        <rect x="0" y="60" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="25" y="90" text-anchor="middle" class="fill-blue-700 font-bold">4</text>
+                                        <rect x="60" y="60" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="85" y="90" text-anchor="middle" class="fill-blue-700 font-bold">5</text>
+                                        <rect x="120" y="60" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="145" y="90" text-anchor="middle" class="fill-blue-700 font-bold">6</text>
+
+                                        <!-- Row 2 -->
+                                        <rect x="0" y="120" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="25" y="150" text-anchor="middle" class="fill-blue-700 font-bold">7</text>
+                                        <rect x="60" y="120" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="85" y="150" text-anchor="middle" class="fill-blue-700 font-bold">8</text>
+                                        <rect x="120" y="120" width="50" height="50" rx="4" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                        <text x="145" y="150" text-anchor="middle" class="fill-blue-700 font-bold">9</text>
+                                    </svg>
+                                </div>
+
                                 <ul>
-                                    <li>Declaration: <code>int matrix[3][3];</code> (3 rows, 3 columns).</li>
+                                    <li>Declaration: <code>int matrix[3][4];</code> (3 rows, 4 columns).</li>
                                     <li>Traverse a 2D array using 2 nested loops (1 for rows, 1 for columns).</li>
                                 </ul>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">5.4. Passing Arrays to Functions</h4>
-                                <p>Passing an array to a function essentially passes its <strong>memory address</strong>. Therefore, any changes made to the array elements inside the function will <strong>persist</strong> in the original array after the function returns.</p>
+                                <p>When passing an array to a function, C <strong>does not copy the entire array</strong> (as that would consume too much memory). Instead, it only passes the <strong>memory address of the first element</strong>.</p>
+                                
+                                <!-- Illustration SVG Passing Array -->
+                                <div class="bg-white border border-slate-200 rounded-2xl p-6 my-6 text-center shadow-sm overflow-x-auto">
+                                    <p class="text-sm font-bold text-slate-500 mb-6 uppercase tracking-widest">Memory Address Mechanism</p>
+                                    <svg viewBox="0 0 500 200" class="w-full max-w-xl mx-auto overflow-visible min-w-[450px]">
+                                        <defs>
+                                            <marker id="arrow-en" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444" />
+                                            </marker>
+                                        </defs>
+                                        <!-- main() memory -->
+                                        <rect x="20" y="20" width="220" height="150" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4"/>
+                                        <text x="130" y="45" text-anchor="middle" fill="#334155" font-weight="bold">main() function</text>
+                                        
+                                        <!-- Array in main -->
+                                        <rect x="40" y="70" width="40" height="40" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                                        <rect x="80" y="70" width="40" height="40" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                                        <rect x="120" y="70" width="40" height="40" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                                        <rect x="160" y="70" width="40" height="40" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                                        <text x="100" y="135" text-anchor="middle" fill="#ef4444" font-family="monospace" font-size="12" font-weight="bold">Address: 0x1000</text>
+                                        <text x="100" y="60" text-anchor="middle" fill="#1e40af" font-family="monospace" font-size="14" font-weight="bold">int arr[4]</text>
+
+                                        <!-- doubleArray() memory -->
+                                        <rect x="300" y="20" width="180" height="150" rx="10" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="2" stroke-dasharray="4"/>
+                                        <text x="390" y="45" text-anchor="middle" fill="#065f46" font-weight="bold">doubleArray() function</text>
+                                        
+                                        <!-- Pointer inside function -->
+                                        <rect x="340" y="70" width="100" height="40" rx="5" fill="#d1fae5" stroke="#10b981" stroke-width="2"/>
+                                        <text x="390" y="95" text-anchor="middle" fill="#047857" font-family="monospace" font-weight="bold">0x1000</text>
+                                        <text x="390" y="60" text-anchor="middle" fill="#064e3b" font-family="monospace" font-size="14" font-weight="bold">Pointer: int a[]</text>
+
+                                        <!-- Arrow -->
+                                        <path d="M 340 90 C 270 90 250 90 210 90" fill="none" stroke="#ef4444" stroke-width="3" marker-end="url(#arrow-en)"/>
+                                        <text x="275" y="80" text-anchor="middle" fill="#ef4444" font-weight="bold" font-size="12">Points back to</text>
+                                    </svg>
+                                </div>
+                                <p>Because of this linkage, any changes made to the elements of array <code>a[]</code> inside the function will <strong>persist</strong> directly on the original <code>arr</code> array in the <code>main()</code> function.</p>
                             </div>`
                         },
-                        codeExample: {
-                            code: `#include <stdio.h>\n\n// Hàm nhân đôi giá trị các phần tử trong mảng\nvoid nhanDoiMang(int arr[], int size) {\n    for (int i = 0; i < size; i++) {\n        arr[i] = arr[i] * 2; // Thay đổi trực tiếp mảng gốc\n    }\n}\n\nint main() {\n    int scores[] = {10, 20, 30, 40, 50};\n    \n    // 1. Tính số lượng phần tử tự động bằng sizeof\n    int size = sizeof(scores) / sizeof(scores[0]);\n    \n    printf("Mang ban dau: ");\n    for (int i = 0; i < size; i++) {\n        printf("%d ", scores[i]);\n    }\n    \n    // 2. Gọi hàm thay đổi mảng (Truyền địa chỉ ngầm định)\n    nhanDoiMang(scores, size);\n    \n    printf("\\nMang sau khi qua ham: ");\n    for (int i = 0; i < size; i++) {\n        printf("%d ", scores[i]);\n    }\n    printf("\\n");\n    \n    return 0;\n}`,
-                            output: `Mang ban dau: 10 20 30 40 50 \nMang sau khi qua ham: 20 40 60 80 100 `
-                        },
+                        codeExamples: [
+                            {
+                                title: { vi: "Ví dụ 1: Lỗi khai báo mảng không kích thước", en: "Example 1: Missing Array Size Error" },
+                                code: `#include <stdio.h>\n\nint main() {\n    // ERROR: Array size missing in 'arr'\n    // Uncommenting the line below will cause a compilation error\n    // int arr[];\n\n    // CORRECT WAY 1: Specify size\n    int arr1[5];\n\n    // CORRECT WAY 2: Initialize immediately\n    int arr2[] = {1, 2, 3};\n\n    printf("Always specify array size or initialize it immediately!\\n");\n    return 0;\n}`,
+                                output: `error: array size missing in 'arr'`
+                            },
+                            {
+                                title: { vi: "Ví dụ 2: Lỗi tràn mảng (Out of Bounds)", en: "Example 2: Out of Bounds Error" },
+                                code: `#include <stdio.h>\n\nint main() {\n    // Declare an array of size 3 (Valid indices: 0, 1, 2)\n    int arr[3] = {10, 20, 30};\n\n    printf("Valid element at index 2: %d\\n", arr[2]);\n\n    // WARNING: Accessing out of bounds\n    // This might print garbage value, cause a Segmentation Fault, or corrupt other variables\n    printf("Out of bounds element at index 5: %d\\n", arr[5]);\n\n    // WARNING: Assigning out of bounds\n    arr[5] = 100; // DANGEROUS! Modifying memory that doesn't belong to the array\n    printf("Assigned 100 to arr[5]. This is dangerous and can crash the program!\\n");\n\n    return 0;\n}`,
+                                output: `Valid element at index 2: 30\nOut of bounds element at index 5: 32767 (Garbage value)\nAssigned 100 to arr[5]. This is dangerous and can crash the program!`
+                            },
+                            {
+                                title: { vi: "Ví dụ 3: Truyền mảng vào hàm", en: "Example 3: Passing Array to Function" },
+                                code: `#include <stdio.h>\n\n// Function to double the values of elements in an array\nvoid doubleArray(int arr[], int size) {\n    for (int i = 0; i < size; i++) {\n        arr[i] = arr[i] * 2; // Modify the original array directly\n    }\n}\n\nint main() {\n    int scores[] = {10, 20, 30, 40, 50};\n    \n    // 1. Calculate the number of elements automatically using sizeof\n    int size = sizeof(scores) / sizeof(scores[0]);\n    \n    printf("Original array: ");\n    for (int i = 0; i < size; i++) {\n        printf("%d ", scores[i]);\n    }\n    \n    // 2. Call function to modify array (Implicit pass by reference)\n    doubleArray(scores, size);\n    \n    printf("\\nArray after passing through function: ");\n    for (int i = 0; i < size; i++) {\n        printf("%d ", scores[i]);\n    }\n    printf("\\n");\n    \n    return 0;\n}`,
+                                output: `Original array: 10 20 30 40 50 \nArray after passing through function: 20 40 60 80 100 `
+                            },
+                            {
+                                title: { vi: "Ví dụ 4: Thao tác Thêm, Sửa, Xóa", en: "Example 4: Insert, Update, Delete Operations" },
+                                code: `#include <stdio.h>\n\nvoid printArray(int arr[], int n) {\n    for (int i = 0; i < n; i++) printf("%d ", arr[i]);\n    printf("\\n");\n}\n\nint main() {\n    // Assume max capacity is 10, currently holding 5 elements\n    int arr[10] = {10, 20, 30, 40, 50};\n    int n = 5;\n\n    printf("1. Original array (size=%d):\\n", n);\n    printArray(arr, n);\n\n    // --- UPDATE (Sửa) ---\n    // Update element at index 2\n    arr[2] = 99;\n    printf("\\n2. After UPDATE at index 2 (value 99, size=%d):\\n", n);\n    printArray(arr, n);\n\n    // --- INSERT (Thêm) ---\n    // Insert value 25 at index 2\n    int posInsert = 2;\n    int valInsert = 25;\n    // Shift elements to the right to make room\n    for (int i = n; i > posInsert; i--) {\n        arr[i] = arr[i - 1];\n    }\n    arr[posInsert] = valInsert;\n    n++; // Increase current size\n    printf("\\n3. After INSERT at index 2 (value 25, size=%d):\\n", n);\n    printArray(arr, n);\n\n    // --- DELETE (Xóa) ---\n    // Delete element at index 3 (which is 99 now)\n    int posDelete = 3;\n    // Shift elements to the left to overwrite\n    for (int i = posDelete; i < n - 1; i++) {\n        arr[i] = arr[i + 1];\n    }\n    n--; // Decrease current size\n    printf("\\n4. After DELETE at index 3 (size=%d):\\n", n);\n    printArray(arr, n);\n\n    return 0;\n}`,
+                                output: `1. Original array (size=5):\n10 20 30 40 50 \n\n2. After UPDATE at index 2 (value 99, size=5):\n10 20 99 40 50 \n\n3. After INSERT at index 2 (value 25, size=6):\n10 20 25 99 40 50 \n\n4. After DELETE at index 3 (size=5):\n10 20 25 40 50 `
+                            },
+                            {
+                                title: { vi: "Ví dụ 5: Mảng 2 chiều (Ma trận)", en: "Example 5: 2D Array (Matrix)" },
+                                code: `#include <stdio.h>\n\nint main() {\n    // Declare and initialize a 3x4 2D array (3 rows, 4 columns)\n    int matrix[3][4] = {\n        {1, 2, 3, 4},\n        {5, 6, 7, 8},\n        {9, 10, 11, 12}\n    };\n\n    int rows = 3;\n    int cols = 4;\n    int sum = 0;\n\n    printf("--- 2D ARRAY (MATRIX %dx%d) ---\\n", rows, cols);\n\n    // Nested loops to iterate through the 2D array\n    for (int i = 0; i < rows; i++) {\n        for (int j = 0; j < cols; j++) {\n            printf("%4d ", matrix[i][j]); // %4d for proper alignment\n            sum += matrix[i][j];\n        }\n        printf("\\n"); // New line after each row\n    }\n\n    printf("\\nTotal sum of all elements: %d\\n", sum);\n\n    return 0;\n}`,
+                                output: `--- 2D ARRAY (MATRIX 3x4) ---\n   1    2    3    4 \n   5    6    7    8 \n   9   10   11   12 \n\nTotal sum of all elements: 78`
+                            }
+                        ],
                         exercises: [
-                            { id: "Bài 5.1", title: { vi: "In mảng đảo ngược (Dễ)", en: "Reverse Array (Easy)" }, desc: { vi: "Viết chương trình tạo mảng số nguyên 5 phần tử. Cho người dùng nhập giá trị từng phần tử. Sau đó in ra mảng theo thứ tự đảo ngược.", en: "Create an integer array of 5 elements. Let user input each value. Then print the array in reverse order." }, io: { vi: "Input: 1 2 3 4 5\nOutput: Dao nguoc: 5 4 3 2 1", en: "Input: 1 2 3 4 5\nOutput: Reversed: 5 4 3 2 1" }, solution: `#include <stdio.h>\n\nint main() {\n    int a[5];\n    printf("Nhap 5 so: \\n");\n    for(int i = 0; i < 5; i++) {\n        scanf("%d", &a[i]);\n    }\n    \n    printf("Dao nguoc: ");\n    for(int i = 4; i >= 0; i--) {\n        printf("%d ", a[i]);\n    }\n    return 0;\n}` },
-                            { id: "Bài 5.2", title: { vi: "Tìm Max trong mảng (TB)", en: "Array Max (Med)" }, desc: { vi: "Viết hàm nhận vào 1 mảng số nguyên và kích thước mảng. Trả về giá trị lớn nhất (MAX) có trong mảng.", en: "Write a function receiving an integer array and its size. Return the maximum value (MAX) in the array." }, io: { vi: "Array: {45, 90, 77, 100, 89}\nOutput: Diem cao nhat la: 100", en: "Array: {45, 90, 77, 100, 89}\nOutput: Highest score is: 100" }, solution: `#include <stdio.h>\n\nint findArrayMax(int arr[], int size) {\n    int max = arr[0];\n    for (int i = 1; i < size; i++) {\n        if (arr[i] > max) max = arr[i];\n    }\n    return max;\n}\n\nint main() {\n    int scores[] = {45, 90, 77, 100, 89};\n    // Sử dụng sizeof để tính size động\n    int size = sizeof(scores) / sizeof(scores[0]);\n    printf("Diem cao nhat la: %d\\n", findArrayMax(scores, size));\n    return 0;\n}` },
-                            { id: "Bài 5.3", title: { vi: "Tổng Hàng & Cột Ma Trận (Khó)", en: "Matrix Row/Col Sum (Hard)" }, desc: { vi: "Khai báo ma trận 3x3. Tính và in ra mảng rSum chứa tổng từng hàng, cSum chứa tổng từng cột theo ví dụ rcSum.c trong giáo trình.", en: "Declare a 3x3 matrix. Calculate and print array rSum for row sums and cSum for column sums as per rcSum.c in the lecture." }, io: { vi: "Input:\n1 2 3\n4 5 6\n7 8 9\nOutput:\nTong hang: 6 15 24\nTong cot: 12 15 18", en: "Input:\n1 2 3\n4 5 6\n7 8 9\nOutput:\nRow sum: 6 15 24\nCol sum: 12 15 18" }, solution: `#include <stdio.h>\n\n#define N 3\n\nint main() {\n    int a[N][N];\n    int rSum[N] = {0}, cSum[N] = {0};\n    \n    printf("Nhap ma tran 3x3:\\n");\n    for (int i = 0; i < N; i++) {\n        for (int j = 0; j < N; j++) {\n            scanf("%d", &a[i][j]);\n        }\n    }\n    \n    // Tinh tong hang va cot (1 vong lap long nhau)\n    for (int i = 0; i < N; i++) {\n        for (int j = 0; j < N; j++) {\n            rSum[i] += a[i][j];\n            cSum[j] += a[i][j];\n        }\n    }\n    \n    printf("Tong tung hang: ");\n    for (int i = 0; i < N; i++) printf("%d ", rSum[i]);\n    \n    printf("\\nTong tung cot: ");\n    for (int j = 0; j < N; j++) printf("%d ", cSum[j]);\n    \n    printf("\\n");\n    return 0;\n}` }
+                            { id: "Bài 5.1", title: { vi: "In mảng đảo ngược (Dễ)", en: "Reverse Array (Easy)" }, desc: { vi: "Viết chương trình tạo mảng số nguyên 5 phần tử. Cho người dùng nhập giá trị từng phần tử. Sau đó in ra mảng theo thứ tự đảo ngược.", en: "Create an integer array of 5 elements. Let user input each value. Then print the array in reverse order." }, io: { vi: "Input: 1 2 3 4 5\nOutput: Reversed: 5 4 3 2 1", en: "Input: 1 2 3 4 5\nOutput: Reversed: 5 4 3 2 1" }, solution: `#include <stdio.h>\n\nint main() {\n    int a[5];\n    printf("Enter 5 numbers: \\n");\n    for(int i = 0; i < 5; i++) {\n        scanf("%d", &a[i]);\n    }\n    \n    printf("Reversed: ");\n    for(int i = 4; i >= 0; i--) {\n        printf("%d ", a[i]);\n    }\n    return 0;\n}` },
+                            { id: "Bài 5.2", title: { vi: "Tìm Max trong mảng (TB)", en: "Array Max (Med)" }, desc: { vi: "Viết hàm nhận vào 1 mảng số nguyên và kích thước mảng. Trả về giá trị lớn nhất (MAX) có trong mảng.", en: "Write a function receiving an integer array and its size. Return the maximum value (MAX) in the array." }, io: { vi: "Array: {45, 90, 77, 100, 89}\nOutput: Highest score is: 100", en: "Array: {45, 90, 77, 100, 89}\nOutput: Highest score is: 100" }, solution: `#include <stdio.h>\n\nint findArrayMax(int arr[], int size) {\n    int max = arr[0];\n    for (int i = 1; i < size; i++) {\n        if (arr[i] > max) max = arr[i];\n    }\n    return max;\n}\n\nint main() {\n    int scores[] = {45, 90, 77, 100, 89};\n    // Use sizeof to dynamically calculate size\n    int size = sizeof(scores) / sizeof(scores[0]);\n    printf("Highest score is: %d\\n", findArrayMax(scores, size));\n    return 0;\n}` },
+                            { id: "Bài 5.3", title: { vi: "Tổng Hàng & Cột Ma Trận (Khó)", en: "Matrix Row/Col Sum (Hard)" }, desc: { vi: "Khai báo ma trận 3x3. Tính và in ra mảng rSum chứa tổng từng hàng, cSum chứa tổng từng cột theo ví dụ rcSum.c trong giáo trình.", en: "Declare a 3x3 matrix. Calculate and print array rSum for row sums and cSum for column sums as per rcSum.c in the lecture." }, io: { vi: "Input:\n1 2 3\n4 5 6\n7 8 9\nOutput:\nRow sum: 6 15 24\nCol sum: 12 15 18", en: "Input:\n1 2 3\n4 5 6\n7 8 9\nOutput:\nRow sum: 6 15 24\nCol sum: 12 15 18" }, solution: `#include <stdio.h>\n\n#define N 3\n\nint main() {\n    int a[N][N];\n    int rSum[N] = {0}, cSum[N] = {0};\n    \n    printf("Enter 3x3 matrix:\\n");\n    for (int i = 0; i < N; i++) {\n        for (int j = 0; j < N; j++) {\n            scanf("%d", &a[i][j]);\n        }\n    }\n    \n    // Calculate sum of rows and columns (using nested loops)\n    for (int i = 0; i < N; i++) {\n        for (int j = 0; j < N; j++) {\n            rSum[i] += a[i][j];\n            cSum[j] += a[i][j];\n        }\n    }\n    \n    printf("Row sum: ");\n    for (int i = 0; i < N; i++) printf("%d ", rSum[i]);\n    \n    printf("\\nCol sum: ");\n    for (int j = 0; j < N; j++) printf("%d ", cSum[j]);\n    \n    printf("\\n");\n    return 0;\n}` }
                         ]
                     },
                     {
@@ -1003,65 +1332,172 @@
                         theory: {
                             vi: `<div>
                                 <h4 class="font-bold text-blue-700 text-lg mb-3">6.1. Bản chất của Chuỗi trong C</h4>
-                                <p>Trong C, không có kiểu <code>string</code> độc lập như các ngôn ngữ khác (Python, Java). Chuỗi thực chất là mảng ký tự được kết thúc bằng "ký tự null" (<code>'\\0'</code>).</p>
+                                <p>Trong C, không có kiểu dữ liệu <code>string</code> độc lập như các ngôn ngữ hiện đại (Python, Java). Chuỗi thực chất là một <strong>mảng các ký tự (char)</strong> và bắt buộc phải được kết thúc bằng một <strong>"ký tự null"</strong> (viết là <code>'\\0'</code>).</p>
+                                
+                                <!-- Hình ảnh minh hoạ SVG Chuỗi -->
+                                <div class="bg-white border border-slate-200 rounded-2xl p-6 my-6 text-center shadow-sm overflow-x-auto">
+                                    <p class="text-sm font-bold text-slate-500 mb-6 uppercase tracking-widest">Minh họa Chuỗi: char str[6] = "Hello";</p>
+                                    <svg viewBox="0 0 500 100" class="w-full max-w-2xl mx-auto overflow-visible min-w-[450px]">
+                                        <g transform="translate(40, 30)">
+                                            <!-- H -->
+                                            <rect x="0" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="30" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">Index 0</text>
+                                            <text x="30" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-2xl">'H'</text>
+                                            
+                                            <!-- e -->
+                                            <rect x="75" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="105" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">1</text>
+                                            <text x="105" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-2xl">'e'</text>
+                                            
+                                            <!-- l -->
+                                            <rect x="150" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="180" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">2</text>
+                                            <text x="180" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-2xl">'l'</text>
+                                            
+                                            <!-- l -->
+                                            <rect x="225" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="255" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">3</text>
+                                            <text x="255" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-2xl">'l'</text>
+                                            
+                                            <!-- o -->
+                                            <rect x="300" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="330" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">4</text>
+                                            <text x="330" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-2xl">'o'</text>
+
+                                            <!-- \0 -->
+                                            <rect x="375" y="0" width="60" height="60" rx="8" class="fill-red-50 stroke-red-500 stroke-2"/>
+                                            <text x="405" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">5</text>
+                                            <text x="405" y="36" text-anchor="middle" class="fill-red-600 font-bold text-2xl">'\\0'</text>
+                                            
+                                            <!-- Chú thích null -->
+                                            <text x="405" y="80" text-anchor="middle" class="fill-red-500 font-mono text-[11px] font-bold">Null Terminator</text>
+
+                                            <!-- Tên mảng -->
+                                            <text x="-15" y="36" text-anchor="end" class="fill-slate-800 font-mono font-bold text-lg">str</text>
+                                        </g>
+                                    </svg>
+                                </div>
+                                <p>Ký tự <code>'\\0'</code> báo cho máy tính biết chuỗi kết thúc ở đâu. Nếu bạn muốn lưu chữ "Hello" (5 ký tự), bạn phải khai báo mảng có kích thước ít nhất là 6.</p>
                                 <ul>
-                                    <li>Khai báo: <code>char name[50];</code> (Mảng chứa tối đa 49 ký tự và 1 ký tự null).</li>
-                                    <li>Khởi tạo: <code>char greeting[] = "Hello";</code> (Máy tự thêm '\\0' vào cuối).</li>
+                                    <li>Khai báo: <code>char name[50];</code> (Chứa tối đa 49 ký tự và 1 ký tự null).</li>
+                                    <li>Khởi tạo: <code>char greeting[] = "Hello";</code> (Máy tính tự động đính kèm <code>'\\0'</code> vào cuối cùng).</li>
                                 </ul>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">6.2. Nhập/Xuất Chuỗi</h4>
                                 <ul>
-                                    <li><strong>Xuất:</strong> Sử dụng <code>%s</code> trong printf. VD: <code>printf("%s", name);</code></li>
-                                    <li><strong>Nhập (Không có dấu cách):</strong> <code>scanf("%s", name);</code> (Lưu ý: Không dùng dấu <code>&</code> vì tên mảng bản chất đã là địa chỉ). scanf sẽ dừng đọc khi gặp khoảng trắng.</li>
-                                    <li><strong>Nhập (Có khoảng trắng):</strong> <code>fgets(name, sizeof(name), stdin);</code>. An toàn nhất để đọc họ tên chứa khoảng trắng.</li>
+                                    <li><strong>Xuất chuỗi:</strong> Sử dụng <code>%s</code> trong <code>printf</code> hoặc dùng hàm <code>puts(chuoi)</code>.</li>
+                                    <li><strong>Nhập bằng <code>scanf</code> (Không nhận dấu cách):</strong> Cú pháp: <code>scanf("%s", name);</code>. Cực kỳ lưu ý: Không dùng dấu <code>&amp;</code> trước tên biến vì tên mảng bản chất đã là địa chỉ. Nhược điểm: Nó sẽ dừng đọc ngay khi gặp khoảng trắng.</li>
+                                    <li><strong>Nhập bằng <code>fgets</code> (An toàn, nhận dấu cách):</strong> Cú pháp: <code>fgets(name, sizeof(name), stdin);</code>. Đây là cách an toàn nhất để nhập họ tên hay câu văn dài.</li>
                                 </ul>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">6.3. Thư viện xử lý chuỗi <code>&lt;string.h&gt;</code></h4>
+                                <p>C cung cấp rất nhiều hàm có sẵn để thao tác với chuỗi. Bạn bắt buộc phải khai báo thư viện <code>#include &lt;string.h&gt;</code> ở đầu file.</p>
                                 <table>
-                                    <thead><tr><th>Hàm</th><th>Mô tả</th><th>Lưu ý</th></tr></thead>
+                                    <thead><tr><th>Hàm</th><th>Ý nghĩa</th><th>Ví dụ minh họa</th></tr></thead>
                                     <tbody>
-                                        <tr><td><code>strlen(str)</code></td><td>Độ dài chuỗi</td><td>Không tính ký tự kết thúc \\0</td></tr>
-                                        <tr><td><code>strcpy(dest, src)</code></td><td>Copy chuỗi sang dest</td><td>C không cho phép dùng dest = src</td></tr>
-                                        <tr><td><code>strcmp(s1, s2)</code></td><td>So sánh chuỗi</td><td>Trả về 0 nếu giống hệt nhau</td></tr>
-                                        <tr><td><code>strcat(dest, src)</code></td><td>Nối chuỗi</td><td>Mảng dest phải đủ khoảng trống</td></tr>
+                                        <tr><td><code>strlen(str)</code></td><td>Lấy độ dài chuỗi</td><td><code>strlen("Hi")</code> trả về 2 (Không tính \\0)</td></tr>
+                                        <tr><td><code>strcpy(dest, src)</code></td><td>Copy chuỗi</td><td>Copy chuỗi src sang dest. C không cho phép <code>dest = src</code></td></tr>
+                                        <tr><td><code>strcat(dest, src)</code></td><td>Nối chuỗi</td><td>Nối src vào đuôi dest (dest phải đủ rộng)</td></tr>
+                                        <tr><td><code>strcmp(s1, s2)</code></td><td>So sánh chuỗi</td><td>Trả về 0 nếu giống hệt nhau, >0 hoặc <0 nếu khác nhau</td></tr>
+                                        <tr><td><code>strlwr(str)</code> / <code>strupr(str)</code></td><td>Chữ thường / Chữ hoa</td><td>Đổi toàn bộ chuỗi sang in thường hoặc in hoa</td></tr>
                                     </tbody>
                                 </table>
                             </div>`,
                             en: `<div>
                                 <h4 class="font-bold text-blue-700 text-lg mb-3">6.1. Nature of Strings in C</h4>
-                                <p>C does not have an independent <code>string</code> type. A string is essentially an array of characters terminated by a "null character" (<code>'\\0'</code>).</p>
+                                <p>In C, there is no independent <code>string</code> data type like in modern languages (Python, Java). A string is essentially an <strong>array of characters (char)</strong> and must be terminated by a <strong>"null character"</strong> (written as <code>'\\0'</code>).</p>
+                                
+                                <!-- Illustration SVG 1D -->
+                                <div class="bg-white border border-slate-200 rounded-2xl p-6 my-6 text-center shadow-sm overflow-x-auto">
+                                    <p class="text-sm font-bold text-slate-500 mb-6 uppercase tracking-widest">String Illustration: char str[6] = "Hello";</p>
+                                    <svg viewBox="0 0 500 100" class="w-full max-w-2xl mx-auto overflow-visible min-w-[450px]">
+                                        <g transform="translate(40, 30)">
+                                            <!-- H -->
+                                            <rect x="0" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="30" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">Index 0</text>
+                                            <text x="30" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-2xl">'H'</text>
+                                            
+                                            <!-- e -->
+                                            <rect x="75" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="105" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">1</text>
+                                            <text x="105" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-2xl">'e'</text>
+                                            
+                                            <!-- l -->
+                                            <rect x="150" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="180" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">2</text>
+                                            <text x="180" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-2xl">'l'</text>
+                                            
+                                            <!-- l -->
+                                            <rect x="225" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="255" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">3</text>
+                                            <text x="255" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-2xl">'l'</text>
+                                            
+                                            <!-- o -->
+                                            <rect x="300" y="0" width="60" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="330" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">4</text>
+                                            <text x="330" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-2xl">'o'</text>
+
+                                            <!-- \0 -->
+                                            <rect x="375" y="0" width="60" height="60" rx="8" class="fill-red-50 stroke-red-500 stroke-2"/>
+                                            <text x="405" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">5</text>
+                                            <text x="405" y="36" text-anchor="middle" class="fill-red-600 font-bold text-2xl">'\\0'</text>
+                                            
+                                            <!-- Null Note -->
+                                            <text x="405" y="80" text-anchor="middle" class="fill-red-500 font-mono text-[11px] font-bold">Null Terminator</text>
+
+                                            <!-- Array Name -->
+                                            <text x="-15" y="36" text-anchor="end" class="fill-slate-800 font-mono font-bold text-lg">str</text>
+                                        </g>
+                                    </svg>
+                                </div>
+                                <p>The <code>'\\0'</code> character tells the computer where the string ends. If you want to store the word "Hello" (5 characters), you must declare an array of at least size 6.</p>
                                 <ul>
-                                    <li>Declaration: <code>char name[50];</code> (Max 49 characters + 1 null character).</li>
-                                    <li>Initialization: <code>char greeting[] = "Hello";</code> (Compiler auto-adds '\\0').</li>
+                                    <li>Declaration: <code>char name[50];</code> (Holds max 49 characters and 1 null character).</li>
+                                    <li>Initialization: <code>char greeting[] = "Hello";</code> (The compiler automatically appends <code>'\\0'</code> at the end).</li>
                                 </ul>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">6.2. String I/O</h4>
                                 <ul>
-                                    <li><strong>Output:</strong> Use <code>%s</code> in printf. Ex: <code>printf("%s", name);</code></li>
-                                    <li><strong>Input (No spaces):</strong> <code>scanf("%s", name);</code> (Note: No <code>&</code> needed as array name is an address). Stops reading at a space.</li>
-                                    <li><strong>Input (With spaces):</strong> <code>fgets(name, sizeof(name), stdin);</code>. Safest method for names with spaces.</li>
+                                    <li><strong>Output:</strong> Use <code>%s</code> in <code>printf</code> or use <code>puts(string)</code>.</li>
+                                    <li><strong>Input with <code>scanf</code> (No spaces):</strong> Syntax: <code>scanf("%s", name);</code>. Warning: Do NOT use the <code>&amp;</code> symbol because the array name is already an address. Drawback: It stops reading when it encounters a whitespace.</li>
+                                    <li><strong>Input with <code>fgets</code> (Safe, allows spaces):</strong> Syntax: <code>fgets(name, sizeof(name), stdin);</code>. This is the safest method to input full names or long sentences.</li>
                                 </ul>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">6.3. String Library <code>&lt;string.h&gt;</code></h4>
+                                <p>C provides many built-in functions to manipulate strings. You must include the <code>#include &lt;string.h&gt;</code> library at the top of your file.</p>
                                 <table>
-                                    <thead><tr><th>Function</th><th>Description</th><th>Note</th></tr></thead>
+                                    <thead><tr><th>Function</th><th>Meaning</th><th>Example</th></tr></thead>
                                     <tbody>
-                                        <tr><td><code>strlen(str)</code></td><td>String Length</td><td>Excludes the \\0 character</td></tr>
-                                        <tr><td><code>strcpy(dest, src)</code></td><td>Copy to dest</td><td>Cannot use dest = src directly</td></tr>
-                                        <tr><td><code>strcmp(s1, s2)</code></td><td>Compare strings</td><td>Returns 0 if identical</td></tr>
-                                        <tr><td><code>strcat(dest, src)</code></td><td>Concatenate</td><td>Dest array must have enough space</td></tr>
+                                        <tr><td><code>strlen(str)</code></td><td>String Length</td><td><code>strlen("Hi")</code> returns 2 (Excludes \\0)</td></tr>
+                                        <tr><td><code>strcpy(dest, src)</code></td><td>Copy String</td><td>Copies src to dest. C does not allow <code>dest = src</code></td></tr>
+                                        <tr><td><code>strcat(dest, src)</code></td><td>Concatenate</td><td>Appends src to dest (dest must have enough space)</td></tr>
+                                        <tr><td><code>strcmp(s1, s2)</code></td><td>Compare Strings</td><td>Returns 0 if identical, >0 or <0 if different</td></tr>
+                                        <tr><td><code>strlwr(str)</code> / <code>strupr(str)</code></td><td>Lower / Uppercase</td><td>Converts the string to lower or uppercase</td></tr>
                                     </tbody>
                                 </table>
                             </div>`
                         },
-                        codeExample: {
-                            code: `#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char fullName[50];\n    char password[20] = "secret123";\n    char inputPass[20];\n\n    // 1. Nhập chuỗi (Giả lập)\n    strcpy(fullName, "Nguyen Van A");\n    printf("Xin chao, %s! (Do dai: %lu ky tu)\\n", fullName, strlen(fullName));\n\n    // 2. So sánh chuỗi\n    strcpy(inputPass, "secret123");\n    if (strcmp(inputPass, password) == 0) {\n        printf("Dang nhap thanh cong!\\n");\n    }\n    return 0;\n}`,
-                            output: `Xin chao, Nguyen Van A! (Do dai: 12 ky tu)\nDang nhap thanh cong!`
-                        },
+                        codeExamples: [
+                            {
+                                title: { vi: "Ví dụ 1: Ký tự Null (Null Terminator)", en: "Example 1: The Null Terminator" },
+                                code: `#include <stdio.h>\n\nint main() {\n    // Initialize an array with extra space\n    char str[20] = "Hello World";\n\n    printf("1. Original string: %s\\n", str);\n\n    // Artificially placing a null terminator at index 5 (replacing the space)\n    str[5] = '\\0';\n\n    printf("2. After setting str[5] = '\\\\0': %s\\n", str);\n    printf("Explanation: The printf function stops printing as soon as it sees '\\\\0'.\\n");\n\n    return 0;\n}`,
+                                output: `1. Original string: Hello World\n2. After setting str[5] = '\\0': Hello\nExplanation: The printf function stops printing as soon as it sees '\\0'.`
+                            },
+                            {
+                                title: { vi: "Ví dụ 2: Nhập/Xuất Chuỗi", en: "Example 2: String Input/Output" },
+                                code: `#include <stdio.h>\n\nint main() {\n    char firstName[20];\n    char fullName[50];\n\n    // Using scanf (Stops at space)\n    // Note: Simulated input for scanf is "John Doe"\n    printf("Enter first name (scanf): ");\n    // scanf("%s", firstName); \n    // Simulation:\n    printf("John Doe\\n");\n    printf("Result of scanf: John\\n\\n");\n\n    // Using fgets (Reads entire line including spaces)\n    // Note: Simulated input for fgets is "John Doe"\n    printf("Enter full name (fgets): ");\n    // fgets(fullName, sizeof(fullName), stdin);\n    // Simulation:\n    printf("John Doe\\n");\n    printf("Result of fgets: John Doe\\n");\n\n    return 0;\n}`,
+                                output: `Enter first name (scanf): John Doe\nResult of scanf: John\n\nEnter full name (fgets): John Doe\nResult of fgets: John Doe`
+                            },
+                            {
+                                title: { vi: "Ví dụ 3: Thư viện <string.h>", en: "Example 3: <string.h> Library" },
+                                code: `#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char str1[50] = "Programming";\n    char str2[] = " in C";\n    char dest[50];\n\n    // 1. strlen: Get length\n    printf("Length of '%s' is: %lu\\n", str1, strlen(str1));\n\n    // 2. strcpy: Copy string\n    strcpy(dest, str1); // Copy str1 into dest\n    printf("After strcpy, dest contains: %s\\n", dest);\n\n    // 3. strcat: Concatenate strings\n    strcat(str1, str2); // Append str2 to str1\n    printf("After strcat, str1 becomes: %s\\n", str1);\n\n    // 4. strcmp: Compare strings\n    char pass1[] = "12345";\n    char pass2[] = "12345";\n    if (strcmp(pass1, pass2) == 0) {\n        printf("strcmp result: Passwords match!\\n");\n    } else {\n        printf("strcmp result: Passwords do not match.\\n");\n    }\n\n    return 0;\n}`,
+                                output: `Length of 'Programming' is: 11\nAfter strcpy, dest contains: Programming\nAfter strcat, str1 becomes: Programming in C\nstrcmp result: Passwords match!`
+                            }
+                        ],
                         exercises: [
-                            { id: "Bài 6.1", title: { vi: "Độ dài từ (Dễ)", en: "Word Length (Easy)" }, desc: { vi: "Yêu cầu người dùng nhập một từ (không có khoảng trắng). In ra từ đó và độ dài của từ.", en: "Ask user to input a word (no spaces). Print the word and its length." }, io: { vi: "Input: Hello\nOutput: Tu vua nhap: Hello\nDo dai: 5", en: "Input: Hello\nOutput: Input word: Hello\nLength: 5" }, solution: `#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char word[50];\n    printf("Nhap mot tu: ");\n    scanf("%s", word);\n    printf("Tu vua nhap: %s\\n", word);\n    printf("Do dai: %lu\\n", strlen(word));\n    return 0;\n}` },
-                            { id: "Bài 6.2", title: { vi: "Đếm ký tự 'a' (TB)", en: "Count char 'a' (Med)" }, desc: { vi: "Viết chương trình nhập họ tên đầy đủ. Sau đó, duyệt qua từng ký tự của chuỗi và đếm xem có bao nhiêu chữ cái 'a' (hoặc 'A') trong tên đó.", en: "Input full name. Iterate through characters and count occurrences of 'a' or 'A'." }, io: { vi: "Input: Nguyen Van A\nOutput: So chu 'a' xuat hien: 2", en: "Input: Nguyen Van A\nOutput: Occurrences of 'a': 2" }, solution: `#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char name[50];\n    int count = 0;\n    printf("Nhap ho ten: ");\n    fgets(name, sizeof(name), stdin);\n    \n    for(int i = 0; i < strlen(name); i++) {\n        if (name[i] == 'a' || name[i] == 'A') {\n            count++;\n        }\n    }\n    printf("So chu 'a' xuat hien: %d\\n", count);\n    return 0;\n}` },
-                            { id: "Bài 6.3", title: { vi: "Kiểm tra Palindrome (Khó)", en: "Check Palindrome (Hard)" }, desc: { vi: "Viết chương trình kiểm tra một chuỗi có phải là chuỗi đối xứng (Palindrome) đọc xuôi hay ngược đều giống nhau. VD: radar, madam.", en: "Check if a string is a Palindrome (reads the same forwards and backwards). Ex: radar, madam." }, io: { vi: "Input: radar\nOutput: radar la chuoi doi xung.", en: "Input: radar\nOutput: radar is a palindrome." }, solution: `#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char str[50];\n    int isPalindrome = 1;\n    printf("Nhap chuoi: ");\n    scanf("%s", str);\n    int len = strlen(str);\n    \n    for(int i=0; i < len/2; i++) {\n        if(str[i] != str[len-1-i]) {\n            isPalindrome = 0;\n            break;\n        }\n    }\n    \n    if (isPalindrome) printf("%s la chuoi doi xung.\\n", str);\n    else printf("%s khong phai chuoi doi xung.\\n", str);\n    return 0;\n}` }
+                            { id: "Bài 6.1", title: { vi: "Độ dài từ (Dễ)", en: "Word Length (Easy)" }, desc: { vi: "Yêu cầu người dùng nhập một từ (không có khoảng trắng). In ra từ đó và độ dài của từ sử dụng hàm strlen().", en: "Ask user to input a word (no spaces). Print the word and its length using strlen()." }, io: { vi: "Input: Hello\nOutput: Tu vua nhap: Hello\nDo dai: 5", en: "Input: Hello\nOutput: Input word: Hello\nLength: 5" }, solution: `#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char word[50];\n    printf("Enter a word: ");\n    scanf("%s", word);\n    printf("Input word: %s\\n", word);\n    printf("Length: %lu\\n", strlen(word));\n    return 0;\n}` },
+                            { id: "Bài 6.2", title: { vi: "Đếm ký tự 'a' (TB)", en: "Count char 'a' (Med)" }, desc: { vi: "Viết chương trình nhập họ tên đầy đủ. Sau đó, duyệt qua từng ký tự của chuỗi và đếm xem có bao nhiêu chữ cái 'a' (hoặc 'A') trong tên đó.", en: "Input full name. Iterate through characters and count occurrences of 'a' or 'A'." }, io: { vi: "Input: Nguyen Van A\nOutput: So chu 'a' xuat hien: 2", en: "Input: Nguyen Van A\nOutput: Occurrences of 'a': 2" }, solution: `#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char name[50];\n    int count = 0;\n    printf("Enter full name: ");\n    fgets(name, sizeof(name), stdin);\n    \n    for(int i = 0; i < strlen(name); i++) {\n        if (name[i] == 'a' || name[i] == 'A') {\n            count++;\n        }\n    }\n    printf("Occurrences of 'a': %d\\n", count);\n    return 0;\n}` },
+                            { id: "Bài 6.3", title: { vi: "Kiểm tra Palindrome (Khó)", en: "Check Palindrome (Hard)" }, desc: { vi: "Viết chương trình kiểm tra một chuỗi có phải là chuỗi đối xứng (Palindrome) đọc xuôi hay ngược đều giống nhau. VD: radar, madam.", en: "Check if a string is a Palindrome (reads the same forwards and backwards). Ex: radar, madam." }, io: { vi: "Input: radar\nOutput: radar la chuoi doi xung.", en: "Input: radar\nOutput: radar is a palindrome." }, solution: `#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char str[50];\n    int isPalindrome = 1;\n    printf("Enter string: ");\n    scanf("%s", str);\n    int len = strlen(str);\n    \n    for(int i=0; i < len/2; i++) {\n        if(str[i] != str[len-1-i]) {\n            isPalindrome = 0;\n            break;\n        }\n    }\n    \n    if (isPalindrome) printf("%s is a palindrome.\\n", str);\n    else printf("%s is not a palindrome.\\n", str);\n    return 0;\n}` }
                         ]
                     },
                     {
@@ -1102,13 +1538,16 @@
                                 <p>For a function to modify an external variable (like a Swap function), we must pass the address into the function, catch it with a pointer, and change the value using the <code>*</code> operator.</p>
                             </div>`
                         },
-                        codeExample: {
-                            code: `#include <stdio.h>\n\nvoid doubleValue(int *p) {\n    // Thay đổi giá trị tại địa chỉ mà p trỏ tới\n    *p = *p * 2;\n}\n\nint main() {\n    int num = 15;\n    int *ptr = &num; // ptr lưu địa chỉ của num\n\n    printf("Gia tri ban dau: %d\\n", num);\n    printf("Dia chi (RAM): %p\\n", ptr);\n\n    // Truyền địa chỉ vào hàm\n    doubleValue(&num);\n    \n    printf("Sau khi goi ham: %d\\n", num);\n    return 0;\n}`,
-                            output: `Gia tri ban dau: 15\nDia chi (RAM): 0x7ffd1234\nSau khi goi ham: 30`
-                        },
+                        codeExamples: [
+                            {
+                                title: { vi: "Ví dụ 1: Con trỏ cơ bản", en: "Example 1: Basic Pointers" },
+                                code: `#include <stdio.h>\n\nvoid doubleValue(int *p) {\n    // Change value at the address pointed to by p\n    *p = *p * 2;\n}\n\nint main() {\n    int num = 15;\n    int *ptr = &num; // ptr stores the address of num\n\n    printf("Initial value: %d\\n", num);\n    printf("Memory Address: %p\\n", ptr);\n\n    // Pass address to function\n    doubleValue(&num);\n    \n    printf("After function call: %d\\n", num);\n    return 0;\n}`,
+                                output: `Initial value: 15\nMemory Address: 0x7ffd1234\nAfter function call: 30`
+                            }
+                        ],
                         exercises: [
-                            { id: "Bài 7.1", title: { vi: "In giá trị qua con trỏ (Dễ)", en: "Print via pointer (Easy)" }, desc: { vi: "Khai báo biến float temp = 36.5. Khai báo một con trỏ pTemp trỏ tới temp. In ra giá trị của temp thông qua con trỏ pTemp.", en: "Declare float temp = 36.5. Declare pointer pTemp pointing to temp. Print temp's value through pointer pTemp." }, io: { vi: "Output:\nGia tri nhiet do: 36.5", en: "Output:\nTemp value: 36.5" }, solution: `#include <stdio.h>\n\nint main() {\n    float temp = 36.5;\n    float *pTemp = &temp;\n    \n    printf("Gia tri nhiet do (qua bien): %.1f\\n", temp);\n    printf("Gia tri nhiet do (qua con tro): %.1f\\n", *pTemp);\n    return 0;\n}` },
-                            { id: "Bài 7.2", title: { vi: "Hàm Hoán Vị (TB)", en: "Swap Function (Med)" }, desc: { vi: "Viết lại hàm Hoán Vị (Swap) hai số nguyên sử dụng con trỏ (Đã có ở ví dụ Chương 4, ôn tập lại).", en: "Rewrite the Swap function for two integers using pointers (Review from Chapter 4)." }, io: { vi: "Input: a=5, b=10\nOutput: a=10, b=5", en: "Input: a=5, b=10\nOutput: a=10, b=5" }, solution: `#include <stdio.h>\n\nvoid swap(int *a, int *b) {\n    int temp = *a;\n    *a = *b;\n    *b = temp;\n}\n\nint main() {\n    int x = 5, y = 10;\n    swap(&x, &y);\n    printf("Sau khi swap: x=%d, y=%d\\n", x, y);\n    return 0;\n}` }
+                            { id: "Bài 7.1", title: { vi: "In giá trị qua con trỏ (Dễ)", en: "Print via pointer (Easy)" }, desc: { vi: "Khai báo biến float temp = 36.5. Khai báo một con trỏ pTemp trỏ tới temp. In ra giá trị của temp thông qua con trỏ pTemp.", en: "Declare float temp = 36.5. Declare pointer pTemp pointing to temp. Print temp's value through pointer pTemp." }, io: { vi: "Output:\nGia tri nhiet do: 36.5", en: "Output:\nTemp value: 36.5" }, solution: `#include <stdio.h>\n\nint main() {\n    float temp = 36.5;\n    float *pTemp = &temp;\n    \n    printf("Temp value (via var): %.1f\\n", temp);\n    printf("Temp value (via pointer): %.1f\\n", *pTemp);\n    return 0;\n}` },
+                            { id: "Bài 7.2", title: { vi: "Hàm Hoán Vị (TB)", en: "Swap Function (Med)" }, desc: { vi: "Viết lại hàm Hoán Vị (Swap) hai số nguyên sử dụng con trỏ (Đã có ở ví dụ Chương 4, ôn tập lại).", en: "Rewrite the Swap function for two integers using pointers (Review from Chapter 4)." }, io: { vi: "Input: a=5, b=10\nOutput: a=10, b=5", en: "Input: a=5, b=10\nOutput: a=10, b=5" }, solution: `#include <stdio.h>\n\nvoid swap(int *a, int *b) {\n    int temp = *a;\n    *a = *b;\n    *b = temp;\n}\n\nint main() {\n    int x = 5, y = 10;\n    swap(&x, &y);\n    printf("After swap: x=%d, y=%d\\n", x, y);\n    return 0;\n}` }
                         ]
                     },
                     {
@@ -1141,13 +1580,16 @@
                                 <pre class="bg-slate-100 text-slate-800 p-4 rounded-xl font-mono text-[0.9em] mt-4 border border-slate-200">struct Student {\n    int id;\n    char name[50];\n    float gpa;\n};</pre>
                             </div>`
                         },
-                        codeExample: {
-                            code: `#include <stdio.h>\n#include <string.h>\n\nstruct Student {\n    int id;\n    char name[50];\n    float gpa;\n};\n\nint main() {\n    struct Student hs1;\n    hs1.id = 101;\n    strcpy(hs1.name, "Nguyen Van A");\n    hs1.gpa = 8.5;\n\n    printf("Ma HS: %d\\n", hs1.id);\n    printf("Ho ten: %s\\n", hs1.name);\n    printf("Diem TB: %.1f\\n", hs1.gpa);\n\n    // Khởi tạo nhanh\n    struct Student hs2 = {102, "Tran Thi B", 9.0};\n    printf("HS2: %s - %.1f\\n", hs2.name, hs2.gpa);\n    return 0;\n}`,
-                            output: `Ma HS: 101\nHo ten: Nguyen Van A\nDiem TB: 8.5\nHS2: Tran Thi B - 9.0`
-                        },
+                        codeExamples: [
+                            {
+                                title: { vi: "Ví dụ 1: Cấu trúc sinh viên", en: "Example 1: Student Struct" },
+                                code: `#include <stdio.h>\n#include <string.h>\n\nstruct Student {\n    int id;\n    char name[50];\n    float gpa;\n};\n\nint main() {\n    struct Student hs1;\n    hs1.id = 101;\n    strcpy(hs1.name, "Nguyen Van A");\n    hs1.gpa = 8.5;\n\n    printf("Student ID: %d\\n", hs1.id);\n    printf("Full Name: %s\\n", hs1.name);\n    printf("GPA: %.1f\\n", hs1.gpa);\n\n    // Quick initialization\n    struct Student hs2 = {102, "Tran Thi B", 9.0};\n    printf("Student 2: %s - %.1f\\n", hs2.name, hs2.gpa);\n    return 0;\n}`,
+                                output: `Student ID: 101\nFull Name: Nguyen Van A\nGPA: 8.5\nStudent 2: Tran Thi B - 9.0`
+                            }
+                        ],
                         exercises: [
-                            { id: "Bài 8.1", title: { vi: "Struct Sách (TB)", en: "Book Struct (Med)" }, desc: { vi: "Định nghĩa struct Book gồm: Tiêu đề (chuỗi), Tác giả (chuỗi), Năm xuất bản (int). Cho nhập thông tin từ bàn phím và in ra.", en: "Define a Book struct with Title (string), Author (string), and Publication Year (int). Scan info from keyboard and print." }, io: { vi: "Output:\nTieu de: Lập Trình C\nTac gia: Darren\nNam XB: 2024", en: "Output:\nTitle: C Programming\nAuthor: Darren\nYear: 2024" }, solution: `#include <stdio.h>\n#include <string.h>\n\nstruct Book {\n    char title[100];\n    char author[50];\n    int year;\n};\n\nint main() {\n    struct Book b1;\n    // Giả lập nhập\n    strcpy(b1.title, "Lập Trình C");\n    strcpy(b1.author, "Darren");\n    b1.year = 2024;\n    \n    printf("Sach: %s\\nTac gia: %s\\nNam XB: %d\\n", b1.title, b1.author, b1.year);\n    return 0;\n}` },
-                            { id: "Bài 8.2", title: { vi: "Mảng Struct (Khó)", en: "Struct Array (Hard)" }, desc: { vi: "Tạo một mảng lưu trữ 3 Học sinh (struct Student). Dùng vòng lặp nhập thông tin. Tìm và in ra tên học sinh có Điểm TB (GPA) cao nhất.", en: "Create an array to store 3 Students (struct Student). Loop to input info. Find and print the student name with the highest GPA." }, io: { vi: "Output: Hoc sinh diem cao nhat: Binh - 9.5", en: "Output: Highest GPA Student: Binh - 9.5" }, solution: `#include <stdio.h>\n\nstruct Student {\n    int id;\n    char name[50];\n    float gpa;\n};\n\nint main() {\n    struct Student ds[3] = {\n        {1, "An", 7.0}, {2, "Binh", 9.5}, {3, "Chi", 8.0}\n    };\n    \n    int maxIndex = 0;\n    for(int i = 1; i < 3; i++) {\n        if (ds[i].gpa > ds[maxIndex].gpa) {\n            maxIndex = i;\n        }\n    }\n    printf("Hoc sinh diem cao nhat:\\n");\n    printf("Ten: %s - Diem: %.1f\\n", ds[maxIndex].name, ds[maxIndex].gpa);\n    return 0;\n}` }
+                            { id: "Bài 8.1", title: { vi: "Struct Sách (TB)", en: "Book Struct (Med)" }, desc: { vi: "Định nghĩa struct Book gồm: Tiêu đề (chuỗi), Tác giả (chuỗi), Năm xuất bản (int). Cho nhập thông tin từ bàn phím và in ra.", en: "Define a Book struct with Title (string), Author (string), and Publication Year (int). Scan info from keyboard and print." }, io: { vi: "Output:\nTieu de: Lập Trình C\nTac gia: Darren\nNam XB: 2024", en: "Output:\nTitle: C Programming\nAuthor: Darren\nYear: 2024" }, solution: `#include <stdio.h>\n#include <string.h>\n\nstruct Book {\n    char title[100];\n    char author[50];\n    int year;\n};\n\nint main() {\n    struct Book b1;\n    // Input Simulation\n    strcpy(b1.title, "C Programming");\n    strcpy(b1.author, "Darren");\n    b1.year = 2024;\n    \n    printf("Title: %s\\nAuthor: %s\\nYear: %d\\n", b1.title, b1.author, b1.year);\n    return 0;\n}` },
+                            { id: "Bài 8.2", title: { vi: "Mảng Struct (Khó)", en: "Struct Array (Hard)" }, desc: { vi: "Tạo một mảng lưu trữ 3 Học sinh (struct Student). Dùng vòng lặp nhập thông tin. Tìm và in ra tên học sinh có Điểm TB (GPA) cao nhất.", en: "Create an array to store 3 Students (struct Student). Loop to input info. Find and print the student name with the highest GPA." }, io: { vi: "Output: Hoc sinh diem cao nhat: Binh - 9.5", en: "Output: Highest GPA Student: Binh - 9.5" }, solution: `#include <stdio.h>\n\nstruct Student {\n    int id;\n    char name[50];\n    float gpa;\n};\n\nint main() {\n    struct Student ds[3] = {\n        {1, "An", 7.0}, {2, "Binh", 9.5}, {3, "Chi", 8.0}\n    };\n    \n    int maxIndex = 0;\n    for(int i = 1; i < 3; i++) {\n        if (ds[i].gpa > ds[maxIndex].gpa) {\n            maxIndex = i;\n        }\n    }\n    printf("Highest GPA Student:\\n");\n    printf("Name: %s - GPA: %.1f\\n", ds[maxIndex].name, ds[maxIndex].gpa);\n    return 0;\n}` }
                         ]
                     }
                 ];
@@ -1171,9 +1613,10 @@
                         codeExampleTitle: "Mã nguồn minh họa",
                         exerciseTitle: "Bài tập và Đáp án",
                         ioHint: "Gợi ý Input/Output:",
-                        filename: "Giao_Trinh_Lap_Trinh_C_Co_Ban.doc",
+                        filename: "Tong_Hop_Kien_Thuc_C.doc",
                         copyBtn: "Copy",
-                        copiedBtn: "Đã chép"
+                        copiedBtn: "Đã chép",
+                        summaryTitle: "TỔNG HỢP KIẾN THỨC TRỌNG TÂM - LẬP TRÌNH C"
                     },
                     en: {
                         courseTitle: "Basic C Programming",
@@ -1192,9 +1635,10 @@
                         codeExampleTitle: "Source Code Example",
                         exerciseTitle: "Exercises and Solutions",
                         ioHint: "Input/Output Hint:",
-                        filename: "Basic_C_Programming_Course.doc",
+                        filename: "Core_C_Knowledge_Summary.doc",
                         copyBtn: "Copy",
-                        copiedBtn: "Copied!"
+                        copiedBtn: "Copied!",
+                        summaryTitle: "CORE KNOWLEDGE SUMMARY - C PROGRAMMING"
                     }
                 };
 
@@ -1205,7 +1649,7 @@
 
                 const setIndex = (i) => {
                     currentIndex.value = i;
-                    activeTab.value = 'code';
+                    activeTabs.value = {}; // Reset tab của khối minh hoạ
                     // Cuộn phần nội dung chính lên đầu (id="main-scroll")
                     setTimeout(() => {
                         const mainScroll = document.getElementById('main-scroll');
@@ -1216,54 +1660,71 @@
                 const next = () => currentIndex.value < courseData.length - 1 && setIndex(currentIndex.value + 1);
                 const prev = () => currentIndex.value > 0 && setIndex(currentIndex.value - 1);
 
-                const toggleSol = (id) => solutions.value[id] = !solutions.value[id];
-
-                // Cập nhật logic Tải Word để hỗ trợ chuyển đổi ngôn ngữ chuẩn 100%
+                // --- XUẤT FILE WORD BẢN SUMMARY ---
                 const handleDownload = () => {
                     const l = labels.value;
-                    const currentLang = lang.value; // Lấy ngôn ngữ hiện tại đang hiển thị
+                    const currentLang = lang.value;
 
                     const html = `
                         <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                        <head><meta charset='utf-8'><title>${l.courseTitle}</title><style>
-                        body { font-family: 'Times New Roman', serif; padding: 20pt; line-height: 1.5; }
-                        h1 { color: #1e3a8a; text-align: center; font-size: 24pt; margin-bottom: 20pt; text-transform: uppercase; }
-                        h2 { color: #2563eb; border-bottom: 2px solid #2563eb; margin-top: 20pt; padding-bottom: 5pt; }
-                        h3 { color: #16a34a; margin-top: 15pt; font-size: 14pt; }
-                        h4 { color: #047857; margin-top: 10pt; font-size: 12pt; font-style: italic; }
-                        table { border-collapse: collapse; width: 100%; margin: 15pt 0; }
-                        th, td { border: 1px solid #999; padding: 8pt; text-align: left; vertical-align: top; }
-                        th { background: #f3f4f6; font-weight: bold; }
-                        pre { background: #f8fafc; padding: 15pt; border: 1px solid #cbd5e1; font-family: 'Courier New', Courier, monospace; font-size: 10.5pt; white-space: pre-wrap; word-wrap: break-word; }
-                        .output-pre { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: bold; }
-                        ul { margin-bottom: 15pt; }
-                        li { margin-bottom: 5pt; }
-                        code { background-color: #f1f5f9; padding: 2px 4px; font-family: monospace; border: 1px solid #e2e8f0; }
-                        </style></head><body>
-                        <h1>${l.courseTitle}</h1>
+                        <head>
+                        <meta charset='utf-8'>
+                        <title>${l.summaryTitle}</title>
+                        <style>
+                            body { font-family: 'Arial', sans-serif; padding: 20px; line-height: 1.6; color: #1e293b; }
+                            .doc-header { text-align: center; border-bottom: 3px solid #2563eb; padding-bottom: 10px; margin-bottom: 30px; }
+                            h1 { color: #1e3a8a; font-size: 24pt; margin: 0; text-transform: uppercase; }
+                            .subtitle { color: #64748b; font-size: 14pt; margin-top: 5px; }
+                            h2 { color: #2563eb; border-left: 5px solid #2563eb; padding-left: 10px; margin-top: 30pt; page-break-after: avoid; }
+                            h3 { color: #0f766e; font-size: 13pt; margin-top: 20pt; border-bottom: 1px dashed #ccc; padding-bottom: 5px; page-break-after: avoid; }
+                            h4 { color: #b45309; font-size: 11pt; margin-top: 15pt; page-break-after: avoid; }
+                            table { border-collapse: collapse; width: 100%; margin: 15pt 0; font-size: 10pt; }
+                            th, td { border: 1px solid #cbd5e1; padding: 8pt; text-align: left; }
+                            th { background: #f1f5f9; font-weight: bold; color: #1e293b; }
+                            pre { background: #f8fafc; padding: 10pt; border: 1px solid #e2e8f0; font-family: 'Courier New', Courier, monospace; font-size: 10pt; white-space: pre-wrap; border-radius: 5px; }
+                            .output-pre { background: #1e293b; color: #34d399; font-weight: bold; border: none; }
+                            code { background-color: #f1f5f9; padding: 2px 4px; font-family: 'Courier New', monospace; color: #b91c1c; }
+                            .theory-box { margin-bottom: 20px; }
+                        </style>
+                        </head>
+                        <body>
+                        <div class="doc-header">
+                            <h1>${l.summaryTitle}</h1>
+                            <div class="subtitle">${l.courseTitle}</div>
+                        </div>
                         ${courseData.map(ch => `
-                            <br clear="all" style="page-break-before:always" />
-                            <h2>${l.chapterPrefix} ${ch.id}: ${ch.title[currentLang]}</h2>
-                            ${ch.theory[currentLang]}
-                            <h3>${l.codeExampleTitle}</h3>
-                            <pre>${ch.codeExample.code}</pre>
-                            <h4>${l.outputTab}</h4>
-                            <pre class="output-pre">${ch.codeExample.output}</pre>
+                            <div style="page-break-inside: auto;">
+                                <br clear="all" style="page-break-before:always" />
+                                <h2>${l.chapterPrefix} ${ch.id}: ${ch.title[currentLang]}</h2>
+                                <div class="theory-box">
+                                    ${ch.theory[currentLang]}
+                                </div>
+                                ${ch.codeExamples ? ch.codeExamples.map(ex => `
+                                    <h3>📋 ${ex.title ? ex.title[currentLang] : l.codeExampleTitle}</h3>
+                                    <pre>${ex.code}</pre>
+                                    <h4>👉 ${l.outputTab}:</h4>
+                                    <pre class="output-pre">${ex.output}</pre>
+                                `).join('') : ''}
+                            </div>
                         `).join('')}
-                        </body></html>`;
+                        </body>
+                        </html>`;
+
                     const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
-                    a.download = l.filename; // Sử dụng tên file theo ngôn ngữ
+                    a.download = l.filename; // Tên file động theo ngôn ngữ
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
-                    URL.revokeObjectURL(a.href); // Xóa URL khỏi bộ nhớ
+                    URL.revokeObjectURL(a.href);
                 };
 
+                const toggleSol = (id) => solutions.value[id] = !solutions.value[id];
+
                 return {
-                    lang, currentIndex, activeTab, isMobileMenuOpen, solutions,
-                    courseData, labels, currentCh, copiedStates,
+                    lang, currentIndex, activeTabs, getActiveTab, setActiveTab,
+                    isMobileMenuOpen, solutions, courseData, labels, currentCh, copiedStates,
                     toggleLang, setIndex, next, prev, toggleSol, handleDownload, copyCode
                 };
             }
