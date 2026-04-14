@@ -148,7 +148,7 @@
         <div
             :class="['fixed top-0 left-0 bottom-0 z-50 w-[85vw] sm:w-96 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col', isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full']">
             <div class="p-6 flex items-center justify-between border-b border-slate-100">
-                <span class="font-black text-blue-600 text-lg tracking-widest">NỘI DUNG</span>
+                <span class="font-black text-blue-600 text-lg tracking-widest">{{ labels.content }}</span>
                 <button @click="isMobileMenuOpen = false"
                     class="p-2 bg-slate-100 rounded-full hover:bg-slate-200 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,7 +160,7 @@
             <nav class="flex-1 overflow-y-auto p-4 space-y-2">
                 <button v-for="(ch, idx) in courseData" :key="ch.id" @click="setIndex(idx); isMobileMenuOpen = false;"
                     :class="['w-full text-left px-4 py-3.5 rounded-xl text-sm transition-all leading-snug break-words', currentIndex === idx ? 'bg-blue-600 text-white font-bold shadow-lg shadow-blue-200' : 'text-slate-600 hover:bg-slate-100']">
-                    Chương {{ ch.id }}: {{ ch.title[lang] }}
+                    {{ labels.chapterPrefix }} {{ ch.id }}: {{ ch.title[lang] }}
                 </button>
             </nav>
         </div>
@@ -263,7 +263,7 @@
                             </section>
 
                             <!-- VÍ DỤ MÃ NGUỒN -->
-                            <section class="mb-20">
+                            <section class="mb-20" v-if="currentCh.codeExamples && currentCh.codeExamples.length > 0">
                                 <h3
                                     class="text-xl sm:text-2xl font-black flex items-center gap-4 mb-8 text-slate-800 border-b border-slate-100 pb-4">
                                     <div
@@ -306,8 +306,7 @@
                                                 </svg> {{ labels.runBtn.toUpperCase() }}
                                             </button>
                                         </div>
-                                        <div
-                                            class="p-6 sm:p-8 text-slate-300 font-mono text-[13px] sm:text-sm overflow-x-auto min-h-[200px] leading-relaxed relative group">
+                                        <div class="relative group">
                                             <!-- Nút Copy Code -->
                                             <button v-if="getActiveTab(exIdx) === 'code'"
                                                 @click="copyCode(example.code, 'main_code_' + exIdx)"
@@ -330,10 +329,10 @@
                                                 <span v-else>{{ labels.copyBtn }}</span>
                                             </button>
 
-                                            <pre
-                                                v-if="getActiveTab(exIdx) === 'code'"><code class="block">{{ example.code }}</code></pre>
-                                            <pre v-else
-                                                class="text-emerald-400 font-bold"><code class="block">{{ example.output }}</code></pre>
+                                            <div class="p-6 sm:p-8 text-slate-300 font-mono text-[13px] sm:text-sm overflow-x-auto min-h-[200px] leading-relaxed">
+                                                <pre v-if="getActiveTab(exIdx) === 'code'"><code class="block">{{ example.code }}</code></pre>
+                                                <pre v-else class="text-emerald-400 font-bold"><code class="block">{{ example.output }}</code></pre>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -366,8 +365,7 @@
                                                 <span class="mt-1 sm:mt-0 leading-tight">{{ ex.title[lang] }}</span>
                                             </h4>
                                         </div>
-                                        <p class="text-slate-700 mb-6 leading-relaxed text-[1rem]">{{ ex.desc[lang] }}
-                                        </p>
+                                        <div class="text-slate-700 mb-6 leading-relaxed text-[1rem]" v-html="ex.desc[lang]"></div>
                                         <div
                                             class="bg-white p-5 rounded-2xl text-[13px] font-mono text-slate-600 mb-6 border border-slate-200 shadow-sm flex items-start gap-3">
                                             <div class="mt-1.5 w-2 h-2 rounded-full bg-amber-400 shrink-0"></div>
@@ -384,7 +382,7 @@
                                         </button>
                                         <transition name="fade">
                                             <div v-if="solutions[ex.id]"
-                                                class="mt-6 p-6 sm:p-8 bg-[#0f172a] text-slate-300 rounded-3xl text-[13px] font-mono overflow-x-auto border border-slate-800 shadow-inner relative group/sol">
+                                                class="mt-6 bg-[#0f172a] text-slate-300 rounded-3xl text-[13px] font-mono border border-slate-800 shadow-inner relative group/sol overflow-hidden">
                                                 <!-- Nút Copy Bài Tập -->
                                                 <button @click="copyCode(ex.solution, ex.id)"
                                                     class="absolute top-4 right-4 bg-slate-700/80 hover:bg-slate-600 text-white px-3 py-2 rounded-xl opacity-100 sm:opacity-0 sm:group-hover/sol:opacity-100 transition-all flex items-center gap-2 text-[11px] font-bold z-10 backdrop-blur-sm shadow-md active:scale-95">
@@ -405,7 +403,9 @@
                                                     <span v-else>{{ labels.copyBtn }}</span>
                                                 </button>
 
-                                                <pre><code class="block">{{ ex.solution }}</code></pre>
+                                                <div class="p-6 sm:p-8 overflow-x-auto">
+                                                    <pre><code class="block">{{ ex.solution }}</code></pre>
+                                                </div>
                                             </div>
                                         </transition>
                                     </div>
@@ -885,7 +885,7 @@
                                     <li><strong>Biến toàn cục (Global):</strong> Khai báo ngoài mọi hàm, tồn tại cho đến khi chương trình kết thúc và có thể dùng ở mọi nơi.</li>
                                     <li><strong>Static:</strong> Khai báo trong hàm, giữ nguyên giá trị cho những lần gọi hàm tiếp theo.</li>
                                 </ul>
-                                <p><strong>Truyền tham số:</strong> Mặc định là "Copy giá trị" (Call-by-Value). Thay đổi biến trong hàm không ảnh hưởng biến ở ngoài. Để thay đổi thực sự, phải dùng con trỏ <code>&</code> (sẽ học ở Chương 7).</p>
+                                <p><strong>Truyền tham số:</strong> Mặc định là "Copy giá trị" (Call-by-Value). Thay đổi biến trong hàm không ảnh hưởng biến ở ngoài. Để thay đổi thực sự, phải dùng con trỏ <code>&</code> (sẽ học ở Chương 9).</p>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">4.4. Thư viện Toán học</h4>
                                 <p class="mt-4 font-semibold">Các hàm toán học thường dùng (cần <code>#include &lt;math.h&gt;</code>):</p>
@@ -930,7 +930,7 @@
                                     <li><strong>Global Variables:</strong> Declared outside all functions, persists until program termination.</li>
                                     <li><strong>Static Variables:</strong> Declared inside a function, retains its value between function calls.</li>
                                 </ul>
-                                <p><strong>Parameter Passing:</strong> Default is Call-by-Value. Changing a variable inside the function doesn't affect the external variable. To actually change it, use pointers <code>&</code> (learned in Chapter 7).</p>
+                                <p><strong>Parameter Passing:</strong> Default is Call-by-Value. Changing a variable inside the function doesn't affect the external variable. To actually change it, use pointers <code>&</code> (learned in Chapter 9).</p>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">4.4. Math Library</h4>
                                 <p class="mt-4 font-semibold">Common Math functions (requires <code>#include &lt;math.h&gt;</code>):</p>
@@ -1503,38 +1503,365 @@
                     {
                         id: 7,
                         title: {
+                            vi: "Kiểu Cấu trúc (Structs)",
+                            en: "Structs"
+                        },
+                        theory: {
+                            vi: `<div>
+                                <h4 class="font-bold text-blue-700 text-lg mb-3">7.1. Tại sao cần Struct?</h4>
+                                <p>Mảng (Arrays) chỉ cho phép lưu trữ nhiều phần tử có <strong>cùng một kiểu dữ liệu</strong> (VD: Một mảng chứa toàn số nguyên). Nhưng trong thực tế, để biểu diễn một đối tượng như "Học sinh", ta cần kết hợp nhiều kiểu dữ liệu khác nhau: ID (số nguyên), Tên (chuỗi), Điểm TB (số thực).</p>
+                                <p><strong>Struct (Cấu trúc)</strong> giải quyết vấn đề này bằng cách cho phép bạn đóng gói nhiều biến có kiểu dữ liệu khác nhau vào chung một "hộp", tạo ra một kiểu dữ liệu mới do chính bạn tự định nghĩa.</p>
+
+                                <!-- Hình ảnh minh hoạ SVG Struct -->
+                                <div class="bg-white border border-slate-200 rounded-2xl p-6 my-6 text-center shadow-sm overflow-x-auto">
+                                    <p class="text-sm font-bold text-slate-500 mb-6 uppercase tracking-widest">Minh họa Struct: Đóng gói dữ liệu</p>
+                                    <svg viewBox="0 0 500 220" class="w-full max-w-2xl mx-auto overflow-visible min-w-[450px]">
+                                        <!-- Hộp bên ngoài (Struct) -->
+                                        <rect x="50" y="20" width="400" height="180" rx="15" class="fill-slate-50 stroke-slate-300 stroke-[3]"/>
+                                        <text x="250" y="55" text-anchor="middle" class="fill-slate-800 font-bold text-xl font-mono">struct Student</text>
+                                        <line x1="50" y1="70" x2="450" y2="70" class="stroke-slate-300 stroke-2" stroke-dasharray="6,4"/>
+
+                                        <!-- Các thành phần bên trong -->
+                                        <g transform="translate(80, 90)">
+                                            <!-- Field 1 -->
+                                            <rect x="0" y="0" width="100" height="80" rx="8" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                            <text x="50" y="30" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">int id</text>
+                                            <text x="50" y="60" text-anchor="middle" class="fill-blue-700 font-bold text-lg">101</text>
+                                            
+                                            <!-- Field 2 -->
+                                            <rect x="120" y="0" width="100" height="80" rx="8" class="fill-emerald-50 stroke-emerald-400 stroke-2"/>
+                                            <text x="170" y="30" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">char name[]</text>
+                                            <text x="170" y="60" text-anchor="middle" class="fill-emerald-700 font-bold text-lg">"John"</text>
+
+                                            <!-- Field 3 -->
+                                            <rect x="240" y="0" width="100" height="80" rx="8" class="fill-amber-50 stroke-amber-400 stroke-2"/>
+                                            <text x="290" y="30" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">float gpa</text>
+                                            <text x="290" y="60" text-anchor="middle" class="fill-amber-700 font-bold text-lg">8.5</text>
+                                        </g>
+                                    </svg>
+                                </div>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">7.2. Khai báo và Truy xuất Dữ liệu</h4>
+                                <ul>
+                                    <li>Dùng từ khóa <code>struct</code> để định nghĩa cấu trúc (Nên khai báo ngoài hàm <code>main</code>).</li>
+                                    <li>Để truy cập hoặc sửa đổi một thành phần con bên trong struct, ta sử dụng <strong>toán tử dấu chấm (<code>.</code>)</strong>.</li>
+                                </ul>
+                                <pre class="bg-slate-100 text-slate-800 p-4 rounded-xl font-mono text-[0.9em] mt-4 border border-slate-200">struct Student {\n    int id;\n    char name[50];\n    float gpa;\n};\n\n// Trong hàm main:\nstruct Student hs1;\nhs1.id = 1; // Sử dụng toán tử chấm</pre>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">7.3. Mảng Cấu trúc (Array of Structs)</h4>
+                                <p>Cũng giống như mảng số nguyên, bạn hoàn toàn có thể tạo ra một mảng chứa nhiều Struct. Đây là cách chuẩn để quản lý danh sách: Danh sách lớp học, danh sách nhân viên, kho hàng hóa...</p>
+                                <ul>
+                                    <li>Khai báo: <code>struct Student classA[40];</code> (Mảng chứa 40 học sinh).</li>
+                                    <li>Truy cập: <code>classA[0].gpa = 9.0;</code> (Đổi điểm GPA của học sinh đầu tiên).</li>
+                                </ul>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">7.4. Từ khóa <code>typedef</code></h4>
+                                <p>Trong C, mỗi lần muốn tạo biến mới, bạn phải viết chữ <code>struct</code> rất dài dòng (VD: <code>struct Student hs1;</code>). Từ khóa <code>typedef</code> cho phép bạn đổi tên kiểu dữ liệu đó thành một cái tên ngắn gọn hơn (thường viết HOA chữ cái đầu).</p>
+                                <pre class="bg-slate-100 text-slate-800 p-4 rounded-xl font-mono text-[0.9em] mt-4 border border-slate-200">typedef struct {\n    int id;\n    float gpa;\n} Student;\n\n// Giờ chỉ cần gọi ngắn gọn:\nStudent hs1;</pre>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">7.5. Struct lồng nhau (Nested Struct)</h4>
+                                <p>Bạn có thể đặt một Struct làm thành phần con bên trong một Struct khác. Ví dụ: Struct <code>Date</code> (Ngày tháng năm) nằm bên trong Struct <code>Employee</code> (Nhân viên) để biểu diễn ngày sinh.</p>
+                                <p>Khi đó, bạn sẽ phải dùng toán tử dấu chấm nhiều lần liên tiếp để truy xuất dữ liệu từ ngoài vào trong: <code>emp1.birthDate.year = 2000;</code></p>
+                            </div>`,
+                            en: `<div>
+                                <h4 class="font-bold text-blue-700 text-lg mb-3">7.1. Why need Structs?</h4>
+                                <p>Arrays only allow storing multiple elements of the <strong>same data type</strong> (e.g., an array of integers). However, in reality, to represent an object like a "Student", we need to combine different data types: ID (integer), Name (string), GPA (float).</p>
+                                <p><strong>Structs (Structures)</strong> solve this problem by allowing you to package multiple variables of different data types into a single "box", creating a new custom data type defined by you.</p>
+
+                                <!-- Illustration SVG Struct -->
+                                <div class="bg-white border border-slate-200 rounded-2xl p-6 my-6 text-center shadow-sm overflow-x-auto">
+                                    <p class="text-sm font-bold text-slate-500 mb-6 uppercase tracking-widest">Struct Illustration: Packaging Data</p>
+                                    <svg viewBox="0 0 500 220" class="w-full max-w-2xl mx-auto overflow-visible min-w-[450px]">
+                                        <!-- Outer Box (Struct) -->
+                                        <rect x="50" y="20" width="400" height="180" rx="15" class="fill-slate-50 stroke-slate-300 stroke-[3]"/>
+                                        <text x="250" y="55" text-anchor="middle" class="fill-slate-800 font-bold text-xl font-mono">struct Student</text>
+                                        <line x1="50" y1="70" x2="450" y2="70" class="stroke-slate-300 stroke-2" stroke-dasharray="6,4"/>
+
+                                        <!-- Inner Fields -->
+                                        <g transform="translate(80, 90)">
+                                            <!-- Field 1 -->
+                                            <rect x="0" y="0" width="100" height="80" rx="8" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                            <text x="50" y="30" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">int id</text>
+                                            <text x="50" y="60" text-anchor="middle" class="fill-blue-700 font-bold text-lg">101</text>
+                                            
+                                            <!-- Field 2 -->
+                                            <rect x="120" y="0" width="100" height="80" rx="8" class="fill-emerald-50 stroke-emerald-400 stroke-2"/>
+                                            <text x="170" y="30" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">char name[]</text>
+                                            <text x="170" y="60" text-anchor="middle" class="fill-emerald-700 font-bold text-lg">"John"</text>
+
+                                            <!-- Field 3 -->
+                                            <rect x="240" y="0" width="100" height="80" rx="8" class="fill-amber-50 stroke-amber-400 stroke-2"/>
+                                            <text x="290" y="30" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">float gpa</text>
+                                            <text x="290" y="60" text-anchor="middle" class="fill-amber-700 font-bold text-lg">8.5</text>
+                                        </g>
+                                    </svg>
+                                </div>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">7.2. Declaration and Data Access</h4>
+                                <ul>
+                                    <li>Use the <code>struct</code> keyword to define the structure (Should be declared outside the <code>main</code> function).</li>
+                                    <li>To access or modify a child component inside a struct, use the <strong>dot operator (<code>.</code>)</strong>.</li>
+                                </ul>
+                                <pre class="bg-slate-100 text-slate-800 p-4 rounded-xl font-mono text-[0.9em] mt-4 border border-slate-200">struct Student {\n    int id;\n    char name[50];\n    float gpa;\n};\n\n// Inside main function:\nstruct Student s1;\ns1.id = 1; // Using the dot operator</pre>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">7.3. Array of Structs</h4>
+                                <p>Just like an integer array, you can create an array containing multiple Structs. This is the standard way to manage lists: Class lists, employee lists, inventory...</p>
+                                <ul>
+                                    <li>Declaration: <code>struct Student classA[40];</code> (Array containing 40 students).</li>
+                                    <li>Access: <code>classA[0].gpa = 9.0;</code> (Change GPA of the first student).</li>
+                                </ul>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">7.4. The <code>typedef</code> Keyword</h4>
+                                <p>In C, every time you want to create a new struct variable, you have to write the lengthy <code>struct</code> keyword (e.g., <code>struct Student s1;</code>). The <code>typedef</code> keyword allows you to rename that data type to a shorter name (usually Capitalized).</p>
+                                <pre class="bg-slate-100 text-slate-800 p-4 rounded-xl font-mono text-[0.9em] mt-4 border border-slate-200">typedef struct {\n    int id;\n    float gpa;\n} Student;\n\n// Now simply call:\nStudent s1;</pre>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">7.5. Nested Structs</h4>
+                                <p>You can place a Struct as a member inside another Struct. For example: A <code>Date</code> struct (Day, Month, Year) placed inside an <code>Employee</code> struct to represent the birth date.</p>
+                                <p>In this case, you will use the dot operator consecutively to drill down to the data: <code>emp1.birthDate.year = 2000;</code></p>
+                            </div>`
+                        },
+                        codeExamples: [
+                            {
+                                title: { vi: "Ví dụ 1: Khai báo và sử dụng cơ bản", en: "Example 1: Basic Declaration and Usage" },
+                                code: `#include <stdio.h>\n#include <string.h>\n\n// Define the Struct\nstruct Student {\n    int id;\n    char name[50];\n    float gpa;\n};\n\nint main() {\n    // 1. Declare and assign values individually\n    struct Student hs1;\n    hs1.id = 101;\n    strcpy(hs1.name, "Nguyen Van A"); // Remember to use strcpy for strings!\n    hs1.gpa = 8.5;\n\n    printf("--- Student 1 ---\\n");\n    printf("ID: %d\\n", hs1.id);\n    printf("Name: %s\\n", hs1.name);\n    printf("GPA: %.1f\\n\\n", hs1.gpa);\n\n    // 2. Quick Initialization\n    struct Student hs2 = {102, "Tran Thi B", 9.2};\n    \n    printf("--- Student 2 ---\\n");\n    printf("ID: %d | Name: %s | GPA: %.1f\\n", hs2.id, hs2.name, hs2.gpa);\n\n    return 0;\n}`,
+                                output: `--- Student 1 ---\nID: 101\nName: Nguyen Van A\nGPA: 8.5\n\n--- Student 2 ---\nID: 102 | Name: Tran Thi B | GPA: 9.2`
+                            },
+                            {
+                                title: { vi: "Ví dụ 2: Mảng Structs", en: "Example 2: Array of Structs" },
+                                code: `#include <stdio.h>\n\n// Define Struct\nstruct Book {\n    int id;\n    char title[30];\n    float price;\n};\n\nint main() {\n    // Initialize an array of 3 Books\n    struct Book library[3] = {\n        {1, "C Programming", 15.5},\n        {2, "Data Structures", 20.0},\n        {3, "Algorithms", 18.5}\n    };\n\n    float totalPrice = 0;\n\n    printf("--- LIBRARY INVENTORY ---\\n");\n    // Loop through the Struct array\n    for (int i = 0; i < 3; i++) {\n        printf("Book %d: %s ($%.2f)\\n", library[i].id, library[i].title, library[i].price);\n        totalPrice += library[i].price;\n    }\n\n    printf("-------------------------\\n");\n    printf("Total Value: $%.2f\\n", totalPrice);\n\n    return 0;\n}`,
+                                output: `--- LIBRARY INVENTORY ---\nBook 1: C Programming ($15.50)\nBook 2: Data Structures ($20.00)\nBook 3: Algorithms ($18.50)\n-------------------------\nTotal Value: $54.00`
+                            },
+                            {
+                                title: { vi: "Ví dụ 3: Typedef và Struct lồng nhau", en: "Example 3: Typedef and Nested Structs" },
+                                code: `#include <stdio.h>\n\n// 1. Define inner struct with typedef\ntypedef struct {\n    int day;\n    int month;\n    int year;\n} Date;\n\n// 2. Define outer struct containing the inner struct\ntypedef struct {\n    int empId;\n    char name[50];\n    Date birthDate; // Nested struct\n} Employee;\n\nint main() {\n    // Notice we don't need the 'struct' keyword anymore thanks to typedef\n    Employee emp1;\n    \n    emp1.empId = 999;\n    // Quick string copy simulation\n    snprintf(emp1.name, sizeof(emp1.name), "Alice Smith");\n    \n    // Accessing nested struct data using dot operator twice\n    emp1.birthDate.day = 15;\n    emp1.birthDate.month = 8;\n    emp1.birthDate.year = 1995;\n\n    printf("--- EMPLOYEE INFO ---\\n");\n    printf("ID: %d\\n", emp1.empId);\n    printf("Name: %s\\n", emp1.name);\n    // Print Date formatting DD/MM/YYYY\n    printf("DOB: %02d/%02d/%d\\n", emp1.birthDate.day, emp1.birthDate.month, emp1.birthDate.year);\n\n    return 0;\n}`,
+                                output: `--- EMPLOYEE INFO ---\nID: 999\nName: Alice Smith\nDOB: 15/08/1995`
+                            }
+                        ],
+                        exercises: [
+                            { id: "Bài 7.1", title: { vi: "Struct Sách (TB)", en: "Book Struct (Med)" }, desc: { vi: "Định nghĩa struct Book gồm: Tiêu đề (chuỗi), Tác giả (chuỗi), Năm xuất bản (int). Cho nhập thông tin một cuốn sách từ bàn phím và in ra màn hình.", en: "Define a Book struct with Title (string), Author (string), and Publication Year (int). Scan info from keyboard and print." }, io: { vi: "Output:\nTieu de: Lập Trình C\nTac gia: Darren\nNam XB: 2024", en: "Output:\nTitle: C Programming\nAuthor: Darren\nYear: 2024" }, solution: `#include <stdio.h>\n#include <string.h>\n\nstruct Book {\n    char title[100];\n    char author[50];\n    int year;\n};\n\nint main() {\n    struct Book b1;\n    // Input Simulation\n    strcpy(b1.title, "C Programming");\n    strcpy(b1.author, "Darren");\n    b1.year = 2024;\n    \n    printf("Title: %s\\nAuthor: %s\\nYear: %d\\n", b1.title, b1.author, b1.year);\n    return 0;\n}` },
+                            { id: "Bài 7.2", title: { vi: "Mảng Học Sinh (Khó)", en: "Student Array (Hard)" }, desc: { vi: "Tạo một mảng lưu trữ 3 Học sinh (dùng struct Student). Duyệt mảng bằng vòng lặp. Tìm và in ra thông tin của học sinh có Điểm TB (GPA) cao nhất.", en: "Create an array to store 3 Students (using struct Student). Loop through the array. Find and print the info of the student with the highest GPA." }, io: { vi: "Output: Hoc sinh diem cao nhat: Binh - 9.5", en: "Output: Highest GPA Student: Binh - 9.5" }, solution: `#include <stdio.h>\n\nstruct Student {\n    int id;\n    char name[50];\n    float gpa;\n};\n\nint main() {\n    struct Student ds[3] = {\n        {1, "An", 7.0}, \n        {2, "Binh", 9.5}, \n        {3, "Chi", 8.0}\n    };\n    \n    int maxIndex = 0;\n    for(int i = 1; i < 3; i++) {\n        if (ds[i].gpa > ds[maxIndex].gpa) {\n            maxIndex = i;\n        }\n    }\n    \n    printf("Highest GPA Student:\\n");\n    printf("Name: %s - GPA: %.1f\\n", ds[maxIndex].name, ds[maxIndex].gpa);\n    return 0;\n}` },
+                            { id: "Bài 7.3", title: { vi: "Quản lý Điểm bằng Typedef (Khó)", en: "Score Mgmt with Typedef (Hard)" }, desc: { vi: "Sử dụng từ khóa typedef để định nghĩa kiểu 'Point' lưu tọa độ không gian (x, y, z). Tạo 2 điểm A(1,2,3) và B(4,5,6). Tính tổng tọa độ của 2 điểm này thành điểm C và in ra màn hình.", en: "Use typedef to define a 'Point' type storing 3D coordinates (x, y, z). Create point A(1,2,3) and B(4,5,6). Calculate the sum of these into point C and print." }, io: { vi: "Output: Diem C(5, 7, 9)", en: "Output: Point C(5, 7, 9)" }, solution: `#include <stdio.h>\n\ntypedef struct {\n    int x;\n    int y;\n    int z;\n} Point;\n\nint main() {\n    Point A = {1, 2, 3};\n    Point B = {4, 5, 6};\n    Point C;\n    \n    C.x = A.x + B.x;\n    C.y = A.y + B.y;\n    C.z = A.z + B.z;\n    \n    printf("Point C(%d, %d, %d)\\n", C.x, C.y, C.z);\n    return 0;\n}` }
+                        ]
+                    },
+                    {
+                        id: 8,
+                        title: {
+                            vi: "Bài tập Tổng hợp (Chương 1-7)",
+                            en: "Comprehensive Practice (Ch. 1-7)"
+                        },
+                        theory: {
+                            vi: `<div>
+                                <h4 class="font-bold text-blue-700 text-lg mb-3">8.1. Tổng kết hành trình</h4>
+                                <p>Bạn đã hoàn thành 7 chương cốt lõi nhất của ngôn ngữ C, bao gồm: <strong>Biến & I/O, Toán tử, Rẽ nhánh & Vòng lặp, Hàm, Mảng, Chuỗi và Cấu trúc (Struct)</strong>. Đây là nền tảng vững chắc để xây dựng mọi phần mềm sau này.</p>
+                                
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">8.2. Kỹ năng Phân tích bài toán (Problem Solving)</h4>
+                                <p>Lập trình không chỉ là gõ code, mà là kỹ năng giải quyết vấn đề. Trước khi viết code, hãy luôn tuân thủ 4 bước sau:</p>
+                                <ol class="list-decimal pl-5">
+                                    <li><strong>Hiểu yêu cầu:</strong> Xác định rõ Input (Đầu vào) và Output (Đầu ra) mong muốn của đề bài là gì.</li>
+                                    <li><strong>Chia nhỏ (Decomposition):</strong> Nếu bài toán lớn, hãy chia thành nhiều hàm nhỏ (VD: Hàm nhập, Hàm xử lý dữ liệu, Hàm xuất kết quả).</li>
+                                    <li><strong>Chọn cấu trúc dữ liệu:</strong> Dữ liệu có cần lưu lại không? Nếu cần lưu nhiều đối tượng giống nhau thì dùng <strong>Mảng</strong>. Nếu đối tượng đó có nhiều thuộc tính khác nhau thì dùng <strong>Struct</strong>.</li>
+                                    <li><strong>Mã hóa & Kiểm thử (Code & Test):</strong> Viết code theo từng bước nhỏ và luôn thử với các trường hợp đặc biệt (nhập sai, nhập số âm, chuỗi rỗng...).</li>
+                                </ol>
+                            </div>`,
+                            en: `<div>
+                                <h4 class="font-bold text-blue-700 text-lg mb-3">8.1. Journey Summary</h4>
+                                <p>You have successfully completed the 7 core chapters of C programming, including: <strong>Variables & I/O, Operators, Control Flow, Functions, Arrays, Strings, and Structs</strong>. This is the solid foundation for building any software.</p>
+                                
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">8.2. Problem Solving Skills</h4>
+                                <p>Programming is not just typing code, it's about solving problems. Before writing code, always follow these 4 steps:</p>
+                                <ol class="list-decimal pl-5">
+                                    <li><strong>Understand the requirement:</strong> Clearly identify the expected Input and Output.</li>
+                                    <li><strong>Decomposition:</strong> If the problem is large, break it down into smaller functions (e.g., Input function, Processing function, Output function).</li>
+                                    <li><strong>Choose Data Structures:</strong> Do you need to store data? If you need to store many similar objects, use an <strong>Array</strong>. If an object has many different attributes, use a <strong>Struct</strong>.</li>
+                                    <li><strong>Code & Test:</strong> Write code step-by-step and always test with edge cases (wrong input, negative numbers, empty strings...).</li>
+                                </ol>
+                            </div>`
+                        },
+                        codeExamples: [
+                            {
+                                title: { vi: "Bộ Khung Dự án mẫu (Project Skeleton)", en: "Project Skeleton Template" },
+                                code: `#include <stdio.h>\n#include <string.h>\n\n// 1. Dinh nghia Struct (Data Models)\ntypedef struct {\n    // ... attributes ...\n} ModelName;\n\n// 2. Khai bao nguyen mau ham (Function Prototypes)\nvoid processData();\n\n// 3. Ham Main (Entry Point)\nint main() {\n    printf("=== START PROJECT ===\\n");\n    // ... Logic dieu khien chinh ...\n    return 0;\n}\n\n// 4. Trien khai chi tiet cac ham (Implementations)\nvoid processData() {\n    // ... Xu ly ...\n}`,
+                                output: `=== START PROJECT ===`
+                            }
+                        ],
+                        exercises: [
+                            { 
+                                id: "Bài 8.1", 
+                                title: { vi: "Phân tích Chuỗi (Dễ)", en: "String Analysis (Easy)" }, 
+                                desc: { 
+                                    vi: "Kết hợp Mảng, Chuỗi & Vòng lặp: Khai báo chuỗi cố định 'Hello Programming'. Viết chương trình đếm và in ra số lượng Nguyên âm (A, E, I, O, U) và số lượng Phụ âm có trong chuỗi. (Bỏ qua khoảng trắng).", 
+                                    en: "Combine Arrays, Strings & Loops: Declare a fixed string 'Hello Programming'. Write a program to count and print the number of Vowels (A, E, I, O, U) and Consonants in it. (Ignore spaces)." 
+                                }, 
+                                io: { 
+                                    vi: "Input: 'Hello Programming'\nOutput:\nNguyen am: 5\nPhu am: 11", 
+                                    en: "Input: 'Hello Programming'\nOutput:\nVowels: 5\nConsonants: 11" 
+                                }, 
+                                solution: `#include <stdio.h>\n#include <string.h>\n#include <ctype.h>\n\nint main() {\n    char str[] = "Hello Programming";\n    int vowels = 0, consonants = 0;\n    \n    for(int i = 0; i < strlen(str); i++) {\n        char ch = tolower(str[i]); // Convert to lowercase for easy checking\n        \n        if (ch >= 'a' && ch <= 'z') { // Check if it's a letter\n            if(ch == 'a' || ch == 'e' || ch == 'i' || ch == 'o' || ch == 'u') {\n                vowels++;\n            } else {\n                consonants++;\n            }\n        }\n    }\n    \n    printf("String: %s\\n", str);\n    printf("Vowels: %d\\n", vowels);\n    printf("Consonants: %d\\n", consonants);\n    return 0;\n}` 
+                            },
+                            { 
+                                id: "Bài 8.2", 
+                                title: { vi: "Quản lý Kho Hàng (Trung bình)", en: "Inventory Management (Med)" }, 
+                                desc: { 
+                                    vi: "Kết hợp Struct, Mảng & Hàm: Định nghĩa Struct `Item` (Mã, Tên, Giá, Số lượng). Khởi tạo mảng 3 mặt hàng. Viết hàm tính và trả về Tổng giá trị của toàn bộ kho hàng (Tổng của Giá * Số lượng từng sản phẩm).", 
+                                    en: "Combine Structs, Arrays & Functions: Define `Item` Struct (ID, Name, Price, Quantity). Initialize an array of 3 items. Write a function to calculate and return the Total Value of the inventory (Sum of Price * Quantity for all items)." 
+                                }, 
+                                io: { 
+                                    vi: "Input: Laptop (1000$ x 2), Mouse (50$ x 15)\nOutput: Tong gia tri kho hang: $2750.00", 
+                                    en: "Input: Laptop (1000$ x 2), Mouse (50$ x 15)\nOutput: Total inventory value: $2750.00" 
+                                }, 
+                                solution: `#include <stdio.h>\n\ntypedef struct {\n    int id;\n    char name[30];\n    float price;\n    int quantity;\n} Item;\n\n// Function to calculate total inventory value\nfloat calcTotalValue(Item arr[], int size) {\n    float total = 0;\n    for(int i = 0; i < size; i++) {\n        total += (arr[i].price * arr[i].quantity);\n    }\n    return total;\n}\n\nint main() {\n    Item inventory[3] = {\n        {1, "Laptop", 1000.0, 2},\n        {2, "Mouse", 50.0, 15},\n        {3, "Keyboard", 80.0, 10}\n    };\n    \n    float totalValue = calcTotalValue(inventory, 3);\n    printf("Total inventory value: $%.2f\\n", totalValue);\n    \n    return 0;\n}` 
+                            },
+                            { 
+                                id: "Bài 8.3", 
+                                title: { vi: "Mô Phỏng ATM Mini (Trung bình - Khó)", en: "Mini ATM Simulation (Med-Hard)" }, 
+                                desc: { 
+                                    vi: "Tư duy Logic toàn diện: Dùng Struct `Account` (Tên, mã PIN, Số dư). Cho mã PIN đúng là 1234 và Số dư ban đầu 500. Dùng vòng lặp `do-while` bắt người dùng nhập mã PIN (chỉ cho phép sai tối đa 3 lần). Nếu đăng nhập thành công, dùng `switch-case` in Menu Menu: 1. Xem số dư, 2. Rút tiền (nếu > số dư báo lỗi), 3. Thoát.", 
+                                    en: "Comprehensive Logic: Use `Account` Struct (Name, PIN, Balance). Set correct PIN to 1234 and Balance 500. Use `do-while` loop to ask for PIN (max 3 wrong attempts). If success, use `switch-case` to show Menu: 1. Balance, 2. Withdraw (error if > balance), 3. Exit." 
+                                }, 
+                                io: { 
+                                    vi: "Input: PIN = 1234 -> Chọn menu 2 -> Nhập 200\nOutput: Rut thanh cong! So du con: $300.00", 
+                                    en: "Input: PIN = 1234 -> Select 2 -> Enter 200\nOutput: Withdraw successful! Balance: $300.00" 
+                                }, 
+                                solution: `#include <stdio.h>\n\ntypedef struct {\n    char name[50];\n    int pin;\n    float balance;\n} Account;\n\nint main() {\n    Account myAcc = {"John Doe", 1234, 500.0};\n    int inputPin, attempts = 0, loggedIn = 0;\n    \n    // 1. LOGIN LOGIC\n    do {\n        printf("Nhap ma PIN: ");\n        scanf("%d", &inputPin);\n        if(inputPin == myAcc.pin) {\n            loggedIn = 1;\n            break;\n        }\n        attempts++;\n        printf("SAI PIN! Ban con %d lan thu.\\n", 3 - attempts);\n    } while(attempts < 3);\n    \n    if(!loggedIn) {\n        printf("Tai khoan bi KHOA.\\n");\n        return 0;\n    }\n    \n    // 2. MENU LOGIC\n    int choice;\n    float amount;\n    printf("\\n--- DANG NHAP THANH CONG, XIN CHAO %s ---\\n", myAcc.name);\n    \n    while(1) {\n        printf("\\n1. Xem So Du | 2. Rut Tien | 3. Thoat\\nChon: ");\n        scanf("%d", &choice);\n        \n        switch(choice) {\n            case 1:\n                printf("So du hien tai: $%.2f\\n", myAcc.balance);\n                break;\n            case 2:\n                printf("Nhap so tien: $");\n                scanf("%f", &amount);\n                if (amount > myAcc.balance) {\n                    printf("Loi: So du khong du!\\n");\n                } else {\n                    myAcc.balance -= amount;\n                    printf("Rut thanh cong! So du con: $%.2f\\n", myAcc.balance);\n                }\n                break;\n            case 3:\n                printf("Thoat chuong trinh.\\n");\n                return 0;\n            default:\n                printf("Lua chon khong hop le.\\n");\n        }\n    }\n    return 0;\n}` 
+                            },
+                            { 
+                                id: "Bài 8.4", 
+                                title: { vi: "Dự án: Quản lý Danh bạ (Khó)", en: "Project: Phonebook App (Hard)" }, 
+                                desc: { 
+                                    vi: `<strong>Dự án Mini:</strong> Xây dựng công cụ Quản lý Danh bạ kết hợp Mảng Cấu trúc và Hàm.<br>
+                                    1. Định nghĩa Struct <code>Contact</code> gồm: ID (int), HoTen (chuỗi), SDT (chuỗi). <br>
+                                    2. Khởi tạo mảng lưu trữ 3 danh bạ mẫu ở hàm main.<br>
+                                    3. Viết hàm <code>displayContacts</code> nhận mảng này và in ra bảng danh bạ. <br>
+                                    4. Viết hàm <code>searchById</code> nhận mảng và 1 ID để tìm kiếm, nếu thấy in ra thông tin, không thấy in báo lỗi.
+                                    <div class="mt-4 p-5 bg-white rounded-xl border border-slate-200 shadow-sm text-center">
+                                        <p class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Cấu trúc mảng Contact[3]</p>
+                                        <svg viewBox="0 0 400 120" class="w-full max-w-[350px] mx-auto overflow-visible">
+                                            <rect x="10" y="10" width="110" height="90" rx="8" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                            <text x="65" y="35" text-anchor="middle" class="fill-blue-800 font-bold text-sm">Contact[0]</text>
+                                            <text x="65" y="60" text-anchor="middle" class="fill-slate-600 text-xs font-mono">ID: 101</text>
+                                            <text x="65" y="80" text-anchor="middle" class="fill-slate-600 text-xs font-mono">"Alice"</text>
+                                            
+                                            <rect x="140" y="10" width="110" height="90" rx="8" class="fill-emerald-50 stroke-emerald-400 stroke-2"/>
+                                            <text x="195" y="35" text-anchor="middle" class="fill-emerald-800 font-bold text-sm">Contact[1]</text>
+                                            <text x="195" y="60" text-anchor="middle" class="fill-slate-600 text-xs font-mono">ID: 102</text>
+                                            <text x="195" y="80" text-anchor="middle" class="fill-slate-600 text-xs font-mono">"Bob"</text>
+                                            
+                                            <rect x="270" y="10" width="110" height="90" rx="8" class="fill-amber-50 stroke-amber-400 stroke-2"/>
+                                            <text x="325" y="35" text-anchor="middle" class="fill-amber-800 font-bold text-sm">Contact[2]</text>
+                                            <text x="325" y="60" text-anchor="middle" class="fill-slate-600 text-xs font-mono">ID: 103</text>
+                                            <text x="325" y="80" text-anchor="middle" class="fill-slate-600 text-xs font-mono">"Charlie"</text>
+                                        </svg>
+                                    </div>`, 
+                                    en: `<strong>Mini Project:</strong> Build a Phonebook tool combining Array of Structs and Functions.<br>
+                                    1. Define Struct <code>Contact</code>: ID (int), Name (string), Phone (string). <br>
+                                    2. Initialize an array of 3 sample contacts in main.<br>
+                                    3. Write <code>displayContacts</code> to print the list. <br>
+                                    4. Write <code>searchById</code> taking the array and an ID to search and print the info.
+                                    <div class="mt-4 p-5 bg-white rounded-xl border border-slate-200 shadow-sm text-center">
+                                        <p class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Contact[3] Array Structure</p>
+                                        <svg viewBox="0 0 400 120" class="w-full max-w-[350px] mx-auto overflow-visible">
+                                            <rect x="10" y="10" width="110" height="90" rx="8" class="fill-blue-50 stroke-blue-400 stroke-2"/>
+                                            <text x="65" y="35" text-anchor="middle" class="fill-blue-800 font-bold text-sm">Contact[0]</text>
+                                            <text x="65" y="60" text-anchor="middle" class="fill-slate-600 text-xs font-mono">ID: 101</text>
+                                            <text x="65" y="80" text-anchor="middle" class="fill-slate-600 text-xs font-mono">"Alice"</text>
+                                            
+                                            <rect x="140" y="10" width="110" height="90" rx="8" class="fill-emerald-50 stroke-emerald-400 stroke-2"/>
+                                            <text x="195" y="35" text-anchor="middle" class="fill-emerald-800 font-bold text-sm">Contact[1]</text>
+                                            <text x="195" y="60" text-anchor="middle" class="fill-slate-600 text-xs font-mono">ID: 102</text>
+                                            <text x="195" y="80" text-anchor="middle" class="fill-slate-600 text-xs font-mono">"Bob"</text>
+                                            
+                                            <rect x="270" y="10" width="110" height="90" rx="8" class="fill-amber-50 stroke-amber-400 stroke-2"/>
+                                            <text x="325" y="35" text-anchor="middle" class="fill-amber-800 font-bold text-sm">Contact[2]</text>
+                                            <text x="325" y="60" text-anchor="middle" class="fill-slate-600 text-xs font-mono">ID: 103</text>
+                                            <text x="325" y="80" text-anchor="middle" class="fill-slate-600 text-xs font-mono">"Charlie"</text>
+                                        </svg>
+                                    </div>` 
+                                }, 
+                                io: { 
+                                    vi: "Input: Gọi hàm searchById(102)\nOutput:\n=> TIM THAY: Bob - SDT: 0912345678", 
+                                    en: "Input: Call searchById(102)\nOutput:\n=> FOUND: Bob - Phone: 0912345678" 
+                                }, 
+                                solution: `#include <stdio.h>\n#include <string.h>\n\n// 1. Define Struct\ntypedef struct {\n    int id;\n    char name[50];\n    char phone[20];\n} Contact;\n\n// 2. Display Function\nvoid displayContacts(Contact arr[], int size) {\n    printf("\\n--- DANH BA DIEN THOAI ---\\n");\n    printf("%-5s | %-20s | %-15s\\n", "ID", "Ho Ten", "So Dien Thoai");\n    for (int i = 0; i < size; i++) {\n        printf("%-5d | %-20s | %-15s\\n", arr[i].id, arr[i].name, arr[i].phone);\n    }\n}\n\n// 3. Search Function\nvoid searchById(Contact arr[], int size, int searchId) {\n    printf("\\nTim kiem ID = %d:\\n", searchId);\n    for(int i = 0; i < size; i++) {\n        if(arr[i].id == searchId) {\n            printf("=> TIM THAY: %s - SDT: %s\\n", arr[i].name, arr[i].phone);\n            return; // Exit function if found\n        }\n    }\n    printf("=> KHONG TIM THAY!\\n");\n}\n\nint main() {\n    Contact phonebook[3] = {\n        {101, "Alice", "0901234567"},\n        {102, "Bob", "0912345678"},\n        {103, "Charlie", "0987654321"}\n    };\n    \n    displayContacts(phonebook, 3);\n    searchById(phonebook, 3, 102);\n    return 0;\n}` 
+                            },
+                            { 
+                                id: "Bài 8.5", 
+                                title: { vi: "Logic: Số lớn thứ hai (Khó)", en: "Logic: Second Largest (Hard)" }, 
+                                desc: { 
+                                    vi: `Tìm phần tử có giá trị lớn thứ hai trong một mảng số nguyên. <br><strong class="text-red-600">Yêu cầu tuyệt đối:</strong> KHÔNG được sử dụng thuật toán sắp xếp mảng, chỉ được phép dùng vòng lặp duyệt qua mảng đúng 1 lần (Độ phức tạp O(n)).
+                                    <div class="bg-amber-50 p-4 rounded-xl border-l-4 border-amber-500 mt-4 text-[0.95rem]"> 
+                                        <strong>💡 Gợi ý Thuật toán:</strong> Sử dụng 2 biến <code>max1</code> (lớn nhất) và <code>max2</code> (lớn nhì). Khởi tạo chúng rất nhỏ. Khi duyệt mảng: <br>
+                                        - Nếu <code>arr[i] > max1</code>: Giá trị lớn nhất cũ sẽ bị đẩy xuống làm giá trị lớn nhì (<code>max2 = max1</code>), và <code>max1 = arr[i]</code>. <br>
+                                        - Nếu <code>max1 > arr[i] > max2</code>: Nghĩa là giá trị này chưa vượt được top 1 nhưng lớn hơn top 2, nên ta cập nhật <code>max2 = arr[i]</code>. 
+                                    </div>`, 
+                                    en: `Find the 2nd largest element in an integer array. <br><strong class="text-red-600">Strict Rule:</strong> DO NOT use sorting algorithms. You must loop through the array exactly once (O(n) complexity).
+                                    <div class="bg-amber-50 p-4 rounded-xl border-l-4 border-amber-500 mt-4 text-[0.95rem]"> 
+                                        <strong>💡 Algorithm Hint:</strong> Use 2 variables <code>max1</code> and <code>max2</code>. When looping: <br>
+                                        - If <code>arr[i] > max1</code>: The old max becomes the second max (<code>max2 = max1</code>), and <code>max1 = arr[i]</code>. <br>
+                                        - If <code>max1 > arr[i] > max2</code>: It didn't beat the top 1 but beat the top 2, so update <code>max2 = arr[i]</code>. 
+                                    </div>` 
+                                }, 
+                                io: { 
+                                    vi: "Input: Mảng {12, 35, 1, 10, 34, 1}\nOutput: So lon thu hai la 34", 
+                                    en: "Input: Array {12, 35, 1, 10, 34, 1}\nOutput: Second largest is 34" 
+                                }, 
+                                solution: `#include <stdio.h>\n#include <limits.h>\n\nint main() {\n    int arr[] = {12, 35, 1, 10, 34, 1};\n    int size = sizeof(arr) / sizeof(arr[0]);\n    \n    int max1 = INT_MIN; // Smallest possible integer\n    int max2 = INT_MIN;\n    \n    for (int i = 0; i < size; i++) {\n        if (arr[i] > max1) {\n            max2 = max1; // Push old max down\n            max1 = arr[i]; // New max\n        } else if (arr[i] > max2 && arr[i] != max1) {\n            // Update max2 if it's smaller than max1\n            max2 = arr[i];\n        }\n    }\n    \n    if (max2 == INT_MIN) printf("Khong co so lon thu hai\\n");\n    else printf("So lon thu hai la %d\\n", max2);\n    \n    return 0;\n}` 
+                            },
+                            { 
+                                id: "Bài 8.6", 
+                                title: { vi: "Thuật toán: Two Sum (Rất Khó)", en: "Algorithm: Two Sum (Very Hard)" }, 
+                                desc: { 
+                                    vi: `Cho một mảng các số nguyên và một số nguyên <code>Target</code>. Hãy tìm 2 vị trí (index) khác nhau trong mảng sao cho tổng giá trị của chúng đúng bằng <code>Target</code>. Giả định rằng bài toán luôn có đúng duy nhất một đáp án.
+                                    <div class="bg-blue-50 p-4 rounded-xl border-l-4 border-blue-500 mt-4 text-[0.95rem]"> 
+                                        <strong>💡 Gợi ý Logic:</strong> Dùng 2 vòng lặp lồng nhau. <br>Vòng lặp ngoài <code>i</code> chạy từ đầu tới gần cuối. Vòng lặp trong <code>j</code> chạy từ <code>i+1</code> tới cuối. Kiểm tra xem <code>arr[i] + arr[j] == Target</code> hay không. 
+                                    </div>`, 
+                                    en: `Given an array of integers and an integer <code>Target</code>. Find 2 distinct indices in the array such that their values add up to exactly <code>Target</code>. Assume there is always exactly one solution.
+                                    <div class="bg-blue-50 p-4 rounded-xl border-l-4 border-blue-500 mt-4 text-[0.95rem]"> 
+                                        <strong>💡 Logic Hint:</strong> Use nested loops. <br>Outer loop <code>i</code> runs from the start. Inner loop <code>j</code> runs from <code>i+1</code> to the end. Check if <code>arr[i] + arr[j] == Target</code>. 
+                                    </div>` 
+                                }, 
+                                io: { 
+                                    vi: "Input: Mảng {2, 7, 11, 15}, Target = 9\nOutput: Vi tri 0 va 1 (vi 2 + 7 = 9)", 
+                                    en: "Input: Array {2, 7, 11, 15}, Target = 9\nOutput: Indices 0 and 1 (because 2 + 7 = 9)" 
+                                }, 
+                                solution: `#include <stdio.h>\n\nint main() {\n    int arr[] = {2, 7, 11, 15};\n    int target = 9;\n    int size = sizeof(arr) / sizeof(arr[0]);\n    \n    // Nested loops to find the pair\n    for (int i = 0; i < size - 1; i++) {\n        for (int j = i + 1; j < size; j++) {\n            if (arr[i] + arr[j] == target) {\n                printf("Vi tri %d va %d (Vi %d + %d = %d)\\n", i, j, arr[i], arr[j], target);\n                return 0; // Found it, end program\n            }\n        }\n    }\n    \n    printf("Khong tim thay ket qua\\n");\n    return 0;\n}` 
+                            }
+                        ]
+                    },
+                    {
+                        id: 9,
+                        title: {
                             vi: "Con trỏ cơ bản (Pointers)",
                             en: "Pointers Basics"
                         },
                         theory: {
                             vi: `<div>
-                                <h4 class="font-bold text-blue-700 text-lg mb-3">7.1. Con trỏ là gì?</h4>
+                                <h4 class="font-bold text-blue-700 text-lg mb-3">9.1. Con trỏ là gì?</h4>
                                 <p>Mỗi biến được lưu trữ tại một vị trí cụ thể trong bộ nhớ (Address). Con trỏ là biến đặc biệt dùng để lưu trữ địa chỉ của một biến khác.</p>
                                 <ul>
                                     <li><strong>Lấy địa chỉ:</strong> Dùng toán tử <code>&amp;</code> (VD: <code>&amp;a</code> là địa chỉ biến a).</li>
                                     <li><strong>Truy cập giá trị tại địa chỉ:</strong> Dùng toán tử <code>*</code> (VD: <code>*ptr</code> là giá trị mà con trỏ đang trỏ tới).</li>
                                 </ul>
 
-                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">7.2. Khai báo và Khởi tạo</h4>
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.2. Khai báo và Khởi tạo</h4>
                                 <p>Khai báo: <code>int *ptr;</code> (Con trỏ trỏ tới một số nguyên).</p>
                                 <p>Khởi tạo: <code>ptr = &amp;a;</code> (Gán địa chỉ của biến cho con trỏ).</p>
 
-                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">7.3. Ứng dụng: Truyền tham chiếu (Pass by Reference)</h4>
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.3. Ứng dụng: Truyền tham chiếu (Pass by Reference)</h4>
                                 <p>Để hàm có thể thay đổi biến ở bên ngoài (như hàm Swap), ta phải truyền địa chỉ biến vào hàm và dùng con trỏ để nhận, sau đó thay đổi giá trị bằng cách dùng toán tử <code>*</code>.</p>
                             </div>`,
                             en: `<div>
-                                <h4 class="font-bold text-blue-700 text-lg mb-3">7.1. What is a Pointer?</h4>
+                                <h4 class="font-bold text-blue-700 text-lg mb-3">9.1. What is a Pointer?</h4>
                                 <p>Every variable is stored at a specific location in memory (Address). A pointer is a special variable used to store the memory address of another variable.</p>
                                 <ul>
                                     <li><strong>Get Address:</strong> Use the <code>&amp;</code> operator (e.g., <code>&amp;a</code> is the address of a).</li>
                                     <li><strong>Access Value at Address:</strong> Use the <code>*</code> operator (e.g., <code>*ptr</code> is the value the pointer is pointing to).</li>
                                 </ul>
 
-                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">7.2. Declaration and Initialization</h4>
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.2. Declaration and Initialization</h4>
                                 <p>Declaration: <code>int *ptr;</code> (Pointer to an integer).</p>
                                 <p>Initialization: <code>ptr = &amp;a;</code> (Assign the variable's address to the pointer).</p>
 
-                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">7.3. Application: Pass by Reference</h4>
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.3. Application: Pass by Reference</h4>
                                 <p>For a function to modify an external variable (like a Swap function), we must pass the address into the function, catch it with a pointer, and change the value using the <code>*</code> operator.</p>
                             </div>`
                         },
@@ -1546,50 +1873,8 @@
                             }
                         ],
                         exercises: [
-                            { id: "Bài 7.1", title: { vi: "In giá trị qua con trỏ (Dễ)", en: "Print via pointer (Easy)" }, desc: { vi: "Khai báo biến float temp = 36.5. Khai báo một con trỏ pTemp trỏ tới temp. In ra giá trị của temp thông qua con trỏ pTemp.", en: "Declare float temp = 36.5. Declare pointer pTemp pointing to temp. Print temp's value through pointer pTemp." }, io: { vi: "Output:\nGia tri nhiet do: 36.5", en: "Output:\nTemp value: 36.5" }, solution: `#include <stdio.h>\n\nint main() {\n    float temp = 36.5;\n    float *pTemp = &temp;\n    \n    printf("Temp value (via var): %.1f\\n", temp);\n    printf("Temp value (via pointer): %.1f\\n", *pTemp);\n    return 0;\n}` },
-                            { id: "Bài 7.2", title: { vi: "Hàm Hoán Vị (TB)", en: "Swap Function (Med)" }, desc: { vi: "Viết lại hàm Hoán Vị (Swap) hai số nguyên sử dụng con trỏ (Đã có ở ví dụ Chương 4, ôn tập lại).", en: "Rewrite the Swap function for two integers using pointers (Review from Chapter 4)." }, io: { vi: "Input: a=5, b=10\nOutput: a=10, b=5", en: "Input: a=5, b=10\nOutput: a=10, b=5" }, solution: `#include <stdio.h>\n\nvoid swap(int *a, int *b) {\n    int temp = *a;\n    *a = *b;\n    *b = temp;\n}\n\nint main() {\n    int x = 5, y = 10;\n    swap(&x, &y);\n    printf("After swap: x=%d, y=%d\\n", x, y);\n    return 0;\n}` }
-                        ]
-                    },
-                    {
-                        id: 8,
-                        title: {
-                            vi: "Kiểu Cấu trúc (Structs)",
-                            en: "Structs"
-                        },
-                        theory: {
-                            vi: `<div>
-                                <h4 class="font-bold text-blue-700 text-lg mb-3">8.1. Tại sao cần Struct?</h4>
-                                <p>Mảng chỉ lưu các phần tử cùng kiểu. Nếu muốn lưu thông tin một Học Sinh gồm: ID (int), Tên (chuỗi), GPA (float), không thể dùng mảng. Struct (Cấu trúc) cho phép nhóm các kiểu dữ liệu khác nhau lại thành 1 kiểu dữ liệu mới do bạn tự định nghĩa.</p>
-
-                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">8.2. Khai báo và Sử dụng</h4>
-                                <ul>
-                                    <li>Dùng từ khóa <code>struct</code> để định nghĩa.</li>
-                                    <li>Truy cập thành phần bằng toán tử dấu chấm (<code>.</code>).</li>
-                                </ul>
-                                <pre class="bg-slate-100 text-slate-800 p-4 rounded-xl font-mono text-[0.9em] mt-4 border border-slate-200">struct Student {\n    int id;\n    char name[50];\n    float gpa;\n};</pre>
-                            </div>`,
-                            en: `<div>
-                                <h4 class="font-bold text-blue-700 text-lg mb-3">8.1. Why need Structs?</h4>
-                                <p>Arrays only store elements of the same type. If you want to store a Student's info: ID (int), Name (string), GPA (float), you cannot use arrays. Structs allow grouping different data types into one custom-defined data type.</p>
-
-                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">8.2. Declaration and Usage</h4>
-                                <ul>
-                                    <li>Use the <code>struct</code> keyword to define.</li>
-                                    <li>Access members using the dot (<code>.</code>) operator.</li>
-                                </ul>
-                                <pre class="bg-slate-100 text-slate-800 p-4 rounded-xl font-mono text-[0.9em] mt-4 border border-slate-200">struct Student {\n    int id;\n    char name[50];\n    float gpa;\n};</pre>
-                            </div>`
-                        },
-                        codeExamples: [
-                            {
-                                title: { vi: "Ví dụ 1: Cấu trúc sinh viên", en: "Example 1: Student Struct" },
-                                code: `#include <stdio.h>\n#include <string.h>\n\nstruct Student {\n    int id;\n    char name[50];\n    float gpa;\n};\n\nint main() {\n    struct Student hs1;\n    hs1.id = 101;\n    strcpy(hs1.name, "Nguyen Van A");\n    hs1.gpa = 8.5;\n\n    printf("Student ID: %d\\n", hs1.id);\n    printf("Full Name: %s\\n", hs1.name);\n    printf("GPA: %.1f\\n", hs1.gpa);\n\n    // Quick initialization\n    struct Student hs2 = {102, "Tran Thi B", 9.0};\n    printf("Student 2: %s - %.1f\\n", hs2.name, hs2.gpa);\n    return 0;\n}`,
-                                output: `Student ID: 101\nFull Name: Nguyen Van A\nGPA: 8.5\nStudent 2: Tran Thi B - 9.0`
-                            }
-                        ],
-                        exercises: [
-                            { id: "Bài 8.1", title: { vi: "Struct Sách (TB)", en: "Book Struct (Med)" }, desc: { vi: "Định nghĩa struct Book gồm: Tiêu đề (chuỗi), Tác giả (chuỗi), Năm xuất bản (int). Cho nhập thông tin từ bàn phím và in ra.", en: "Define a Book struct with Title (string), Author (string), and Publication Year (int). Scan info from keyboard and print." }, io: { vi: "Output:\nTieu de: Lập Trình C\nTac gia: Darren\nNam XB: 2024", en: "Output:\nTitle: C Programming\nAuthor: Darren\nYear: 2024" }, solution: `#include <stdio.h>\n#include <string.h>\n\nstruct Book {\n    char title[100];\n    char author[50];\n    int year;\n};\n\nint main() {\n    struct Book b1;\n    // Input Simulation\n    strcpy(b1.title, "C Programming");\n    strcpy(b1.author, "Darren");\n    b1.year = 2024;\n    \n    printf("Title: %s\\nAuthor: %s\\nYear: %d\\n", b1.title, b1.author, b1.year);\n    return 0;\n}` },
-                            { id: "Bài 8.2", title: { vi: "Mảng Struct (Khó)", en: "Struct Array (Hard)" }, desc: { vi: "Tạo một mảng lưu trữ 3 Học sinh (struct Student). Dùng vòng lặp nhập thông tin. Tìm và in ra tên học sinh có Điểm TB (GPA) cao nhất.", en: "Create an array to store 3 Students (struct Student). Loop to input info. Find and print the student name with the highest GPA." }, io: { vi: "Output: Hoc sinh diem cao nhat: Binh - 9.5", en: "Output: Highest GPA Student: Binh - 9.5" }, solution: `#include <stdio.h>\n\nstruct Student {\n    int id;\n    char name[50];\n    float gpa;\n};\n\nint main() {\n    struct Student ds[3] = {\n        {1, "An", 7.0}, {2, "Binh", 9.5}, {3, "Chi", 8.0}\n    };\n    \n    int maxIndex = 0;\n    for(int i = 1; i < 3; i++) {\n        if (ds[i].gpa > ds[maxIndex].gpa) {\n            maxIndex = i;\n        }\n    }\n    printf("Highest GPA Student:\\n");\n    printf("Name: %s - GPA: %.1f\\n", ds[maxIndex].name, ds[maxIndex].gpa);\n    return 0;\n}` }
+                            { id: "Bài 9.1", title: { vi: "In giá trị qua con trỏ (Dễ)", en: "Print via pointer (Easy)" }, desc: { vi: "Khai báo biến float temp = 36.5. Khai báo một con trỏ pTemp trỏ tới temp. In ra giá trị của temp thông qua con trỏ pTemp.", en: "Declare float temp = 36.5. Declare pointer pTemp pointing to temp. Print temp's value through pointer pTemp." }, io: { vi: "Output:\nGia tri nhiet do: 36.5", en: "Output:\nTemp value: 36.5" }, solution: `#include <stdio.h>\n\nint main() {\n    float temp = 36.5;\n    float *pTemp = &temp;\n    \n    printf("Temp value (via var): %.1f\\n", temp);\n    printf("Temp value (via pointer): %.1f\\n", *pTemp);\n    return 0;\n}` },
+                            { id: "Bài 9.2", title: { vi: "Hàm Hoán Vị (TB)", en: "Swap Function (Med)" }, desc: { vi: "Viết lại hàm Hoán Vị (Swap) hai số nguyên sử dụng con trỏ (Đã có ở ví dụ Chương 4, ôn tập lại).", en: "Rewrite the Swap function for two integers using pointers (Review from Chapter 4)." }, io: { vi: "Input: a=5, b=10\nOutput: a=10, b=5", en: "Input: a=5, b=10\nOutput: a=10, b=5" }, solution: `#include <stdio.h>\n\nvoid swap(int *a, int *b) {\n    int temp = *a;\n    *a = *b;\n    *b = temp;\n}\n\nint main() {\n    int x = 5, y = 10;\n    swap(&x, &y);\n    printf("After swap: x=%d, y=%d\\n", x, y);\n    return 0;\n}` }
                         ]
                     }
                 ];
@@ -1597,6 +1882,7 @@
                 // --- TỪ ĐIỂN ĐA NGÔN NGỮ ---
                 const t = {
                     vi: {
+                        content: "NỘI DUNG",
                         courseTitle: "Lập Trình C Cơ Bản",
                         theory: "Kiến thức trọng tâm",
                         example: "Mã nguồn minh họa",
@@ -1619,6 +1905,7 @@
                         summaryTitle: "TỔNG HỢP KIẾN THỨC TRỌNG TÂM - LẬP TRÌNH C"
                     },
                     en: {
+                        content: "CONTENTS",
                         courseTitle: "Basic C Programming",
                         theory: "Theory Focus",
                         example: "Source Code Example",
