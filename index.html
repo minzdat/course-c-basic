@@ -1294,7 +1294,7 @@
                             },
                             {
                                 title: { vi: "Ví dụ 4: Thao tác Thêm, Sửa, Xóa", en: "Example 4: Insert, Update, Delete Operations" },
-                                code: `#include <stdio.h>\n\nvoid printArray(int arr[], int n) {\n    for (int i = 0; i < n; i++) printf("%d ", arr[i]);\n    printf("\\n");\n}\n\nint main() {\n    // Assume max capacity is 10, currently holding 5 elements\n    int arr[10] = {10, 20, 30, 40, 50};\n    int n = 5;\n\n    printf("1. Original array (size=%d):\\n", n);\n    printArray(arr, n);\n\n    // --- UPDATE (Sửa) ---\n    // Update element at index 2\n    arr[2] = 99;\n    printf("\\n2. After UPDATE at index 2 (value 99, size=%d):\\n", n);\n    printArray(arr, n);\n\n    // --- INSERT (Thêm) ---\n    // Insert value 25 at index 2\n    int posInsert = 2;\n    int valInsert = 25;\n    // Shift elements to the right to make room\n    for (int i = n; i > posInsert; i--) {\n        arr[i] = arr[i - 1];\n    }\n    arr[posInsert] = valInsert;\n    n++; // Increase current size\n    printf("\\n3. After INSERT at index 2 (value 25, size=%d):\\n", n);\n    printArray(arr, n);\n\n    // --- DELETE (Xóa) ---\n    // Delete element at index 3 (which is 99 now)\n    int posDelete = 3;\n    // Shift elements to the left to overwrite\n    for (int i = posDelete; i < n - 1; i++) {\n        arr[i] = arr[i + 1];\n    }\n    n--; // Decrease current size\n    printf("\\n4. After DELETE at index 3 (size=%d):\\n", n);\n    printArray(arr, n);\n\n    return 0;\n}`,
+                                code: `#include <stdio.h>\n\nvoid printArray(int arr[], int n) {\n    for (int i = 0; i < n; i++) printf("%d ", arr[i]);\n    printf("\\n");\n}\n\nint main() {\n    // Assume max capacity is 10, currently holding 5 elements\n    int arr[10] = {10, 20, 30, 40, 50};\n    int n = 5;\n\n    printf("1. Original array (size=%d):\\n", n);\n    printArray(arr, n);\n\n    // --- UPDATE (Sửa) ---\n    // Update element at index 2\n    arr[2] = 99;\n    printf("\\n2. After UPDATE at index 2 (value 99, size=%d):\\n", n);\n    printArray(arr, n);\n\n    // --- INSERT (Thêm) ---\n    // Insert value 25 at index 2\n    int posInsert = 2;\n    int valInsert = 25;\n    // Shift elements to the right to make house\n    for (int i = n; i > posInsert; i--) {\n        arr[i] = arr[i - 1];\n    }\n    arr[posInsert] = valInsert;\n    n++; // Increase current size\n    printf("\\n3. After INSERT at index 2 (value 25, size=%d):\\n", n);\n    printArray(arr, n);\n\n    // --- DELETE (Xóa) ---\n    // Delete element at index 3 (which is 99 now)\n    int posDelete = 3;\n    // Shift elements to the left to overwrite\n    for (int i = posDelete; i < n - 1; i++) {\n        arr[i] = arr[i + 1];\n    }\n    n--; // Decrease current size\n    printf("\\n4. After DELETE at index 3 (size=%d):\\n", n);\n    printArray(arr, n);\n\n    return 0;\n}`,
                                 output: `1. Original array (size=5):\n10 20 30 40 50 \n\n2. After UPDATE at index 2 (value 99, size=5):\n10 20 99 40 50 \n\n3. After INSERT at index 2 (value 25, size=6):\n10 20 25 99 40 50 \n\n4. After DELETE at index 3 (size=5):\n10 20 25 40 50 `
                             },
                             {
@@ -1810,8 +1810,8 @@
                         theory: {
                             vi: `<div>
                                 <h4 class="font-bold text-blue-700 text-lg mb-3">9.1. Biến nằm ở đâu trong máy tính?</h4>
-                                <p>Để hiểu con trỏ, bạn phải hiểu RAM (Bộ nhớ truy cập ngẫu nhiên). RAM giống như một khách sạn khổng lồ chứa hàng tỷ căn phòng nhỏ (mỗi phòng là 1 byte). Mỗi căn phòng đều có một <strong>số nhà duy nhất (Địa chỉ - Address)</strong>, thường được viết dưới dạng số Hex (Hệ thập lục phân) để cho ngắn gọn, ví dụ: <code>0x20000004</code>.</p>
-                                <p>Khi bạn khai báo <code>int a = 10;</code>, máy tính sẽ thuê 4 căn phòng liên tiếp (vì <code>int</code> chiếm 4 bytes) và nhét số 10 vào đó. Nhãn "a" chỉ là tên gọi cho con người dễ nhớ, còn CPU chỉ làm việc với địa chỉ số nhà.</p>
+                                <p>Để hiểu con trỏ, bạn phải hiểu RAM (Bộ nhớ truy cập ngẫu nhiên). RAM giống như một dãy nhà khổng lồ chứa hàng tỷ căn nhà nhỏ (mỗi nhà là 1 byte). Mỗi căn nhà đều có một <strong>số nhà duy nhất (Địa chỉ - Address)</strong>, thường được viết dưới dạng số Hex (Hệ thập lục phân) để cho ngắn gọn, ví dụ: <code>0x20000004</code>.</p>
+                                <p>Khi bạn khai báo <code>int a = 10;</code>, máy tính sẽ thuê 4 căn nhà liên tiếp (vì <code>int</code> chiếm 4 bytes) và nhét số 10 vào đó. Nhãn "a" chỉ là tên gọi cho con người dễ nhớ, còn CPU chỉ làm việc với địa chỉ số nhà.</p>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.2. Khái niệm Con trỏ (Pointer)</h4>
                                 <p><strong>Con trỏ cũng chỉ là một biến bình thường.</strong> Tuy nhiên, thay vì lưu trữ giá trị như số 10 hay ký tự 'A', con trỏ chuyên dùng để <strong>lưu trữ địa chỉ "số nhà" của một biến khác.</strong></p>
@@ -1846,7 +1846,7 @@
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.3. Hai toán tử quan trọng nhất: <code>&</code> và <code>*</code></h4>
                                 <ul>
                                     <li><strong>Toán tử <code>&</code> (Address-of):</strong> Lấy địa chỉ của một biến. Ví dụ: <code>&a</code> (trả về 0x2004).</li>
-                                    <li><strong>Toán tử <code>*</code> (Dereference):</strong> Lấy giá trị tại địa chỉ mà con trỏ đang trỏ tới. Ví dụ: <code>*p</code> (tìm đến phòng 0x2004 và lấy ra số 10). Nếu bạn sửa <code>*p = 99;</code>, thì biến <code>a</code> gốc cũng sẽ bị đổi thành 99.</li>
+                                    <li><strong>Toán tử <code>*</code> (Dereference):</strong> Lấy giá trị tại địa chỉ mà con trỏ đang trỏ tới. Ví dụ: <code>*p</code> (tìm đến nhà 0x2004 và lấy ra số 10). Nếu bạn sửa <code>*p = 99;</code>, thì biến <code>a</code> gốc cũng sẽ bị đổi thành 99.</li>
                                 </ul>
 
                                 <p class="text-[0.95rem] text-amber-800 bg-amber-50 p-4 rounded-xl border-l-4 border-amber-400 font-medium my-4">
@@ -1859,8 +1859,8 @@
                             </div>`,
                             en: `<div>
                                 <h4 class="font-bold text-blue-700 text-lg mb-3">9.1. Where do variables live?</h4>
-                                <p>To understand pointers, you must understand RAM (Random Access Memory). Think of RAM as a giant hotel with billions of small rooms (each room is 1 byte). Every room has a <strong>unique house number (Address)</strong>, usually written in Hexadecimal for brevity, e.g., <code>0x20000004</code>.</p>
-                                <p>When you declare <code>int a = 10;</code>, the computer rents 4 consecutive rooms (since an <code>int</code> takes 4 bytes) and puts the number 10 inside. The label "a" is just for humans; the CPU only works with the numeric address.</p>
+                                <p>To understand pointers, you must understand RAM (Random Access Memory). Think of RAM as a giant row of houses with billions of small houses (each house is 1 byte). Every house has a <strong>unique house number (Address)</strong>, usually written in Hexadecimal for brevity, e.g., <code>0x20000004</code>.</p>
+                                <p>When you declare <code>int a = 10;</code>, the computer rents 4 consecutive houses (since an <code>int</code> takes 4 bytes) and puts the number 10 inside. The label "a" is just for humans; the CPU only works with the numeric address.</p>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.2. Pointer Concept</h4>
                                 <p><strong>A pointer is just a normal variable.</strong> However, instead of storing a value like 10 or 'A', a pointer is dedicated to <strong>storing the "address" of another variable.</strong></p>
@@ -1895,7 +1895,7 @@
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.3. The Two Most Important Operators: <code>&</code> and <code>*</code></h4>
                                 <ul>
                                     <li><strong><code>&</code> Operator (Address-of):</strong> Gets the address of a variable. Ex: <code>&a</code> (returns 0x2004).</li>
-                                    <li><strong><code>*</code> Operator (Dereference):</strong> Gets the value at the address the pointer is holding. Ex: <code>*p</code> (goes to room 0x2004 and gets 10). If you write <code>*p = 99;</code>, the original variable <code>a</code> changes to 99.</li>
+                                    <li><strong><code>*</code> Operator (Dereference):</strong> Gets the value at the address the pointer is holding. Ex: <code>*p</code> (goes to house 0x2004 and gets 10). If you write <code>*p = 99;</code>, the original variable <code>a</code> changes to 99.</li>
                                 </ul>
 
                                 <p class="text-[0.95rem] text-amber-800 bg-amber-50 p-4 rounded-xl border-l-4 border-amber-400 font-medium my-4">
