@@ -222,7 +222,8 @@
                         <button v-for="(ch, idx) in courseData" :key="ch.id" @click="setIndex(idx)"
                             :class="['w-full text-left px-4 py-3.5 rounded-xl text-[0.95rem] leading-snug transition-all flex items-start gap-3 group break-words', 
                                      currentIndex === idx ? 'bg-blue-50 text-blue-700 font-bold border-l-4 border-blue-600 shadow-sm' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent']">
-                            <span class="mt-0.5 shrink-0 text-xs opacity-50 font-mono">0{{ch.id}}</span>
+                            <span class="mt-0.5 shrink-0 text-xs opacity-50 font-mono" v-if="ch.id < 10">0{{ch.id}}</span>
+                            <span class="mt-0.5 shrink-0 text-xs opacity-50 font-mono" v-else>{{ch.id}}</span>
                             <span>{{ ch.title[lang] }}</span>
                         </button>
                     </nav>
@@ -339,7 +340,7 @@
                             </section>
 
                             <!-- BÀI TẬP THỰC HÀNH -->
-                            <section>
+                            <section v-if="currentCh.exercises && currentCh.exercises.length > 0">
                                 <h3
                                     class="text-xl sm:text-2xl font-black flex items-center gap-4 mb-8 text-slate-800 border-b border-slate-100 pb-4">
                                     <div
@@ -444,7 +445,7 @@
         createApp({
             setup() {
                 const lang = ref('vi');
-                const currentIndex = ref(0);
+                const currentIndex = ref(8); // Tạm đặt mặc định mở thẳng chương 9 (index 8) để test
                 const activeTabs = ref({});
                 const isMobileMenuOpen = ref(false);
                 const solutions = ref({});
@@ -473,10 +474,7 @@
                 const courseData = [
                     {
                         id: 1,
-                        title: {
-                            vi: "Biến, Kiểu dữ liệu & Nhập/Xuất chuẩn",
-                            en: "Variables, Data Types & Standard I/O"
-                        },
+                        title: { vi: "Biến, Kiểu dữ liệu & Nhập/Xuất chuẩn", en: "Variables, Data Types & Standard I/O" },
                         theory: {
                             vi: `<div>
                                 <h4 class="font-bold text-blue-700 text-lg mb-3">1.1. Cấu trúc chương trình và Header Files</h4>
@@ -530,7 +528,7 @@
                                 </table>
 
                                 <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">1.4. Hằng số (Symbolic Constants - #define)</h4>
-                                <p>Bên cạnh biến, chúng ta thường sử dụng các giá trị cố định không bao giờ thay đổi trong suốt chương trình (ví dụ: số PI = 3.14159). Thay vì viết trực tiếp con số này nhiều lần, ta có thể định nghĩa nó bằng chỉ thị <code>#define</code>.</p>
+                                <p>Bên cạnh biến, chúng xuất ta thường sử dụng các giá trị cố định không bao giờ thay đổi trong suốt chương trình (ví dụ: số PI = 3.14159). Thay vì viết trực tiếp con số này nhiều lần, ta có thể định nghĩa nó bằng chỉ thị <code>#define</code>.</p>
                                 <ul>
                                     <li>Cú pháp: <code>#define TÊN_HẰNG_SỐ giá_trị</code> (Lưu ý: Không có dấu <code>=</code> và không có dấu <code>;</code> ở cuối).</li>
                                     <li>Theo quy ước, tên hằng số thường được viết HOA toàn bộ để dễ phân biệt với biến thông thường.</li>
@@ -612,10 +610,7 @@
                     },
                     {
                         id: 2,
-                        title: {
-                            vi: "Toán tử và Biểu thức",
-                            en: "Operators & Expressions"
-                        },
+                        title: { vi: "Toán tử và Biểu thức", en: "Operators & Expressions" },
                         theory: {
                             vi: `<div>
                                 <h4 class="font-bold text-blue-700 text-lg mb-3">2.1. Toán tử số học</h4>
@@ -749,10 +744,7 @@
                     },
                     {
                         id: 3,
-                        title: {
-                            vi: "Cấu trúc điều khiển (Rẽ nhánh & Vòng lặp)",
-                            en: "Control Structures (Branching & Loops)"
-                        },
+                        title: { vi: "Cấu trúc điều khiển", en: "Control Structures" },
                         theory: {
                             vi: `<div>
                                 <h4 class="font-bold text-blue-700 text-lg mb-3">3.1. Rẽ nhánh (if-else, switch, goto)</h4>
@@ -862,10 +854,7 @@
                     },
                     {
                         id: 4,
-                        title: {
-                            vi: "Hàm (Functions)",
-                            en: "Functions"
-                        },
+                        title: { vi: "Hàm (Functions)", en: "Functions" },
                         theory: {
                             vi: `<div>
                                 <h4 class="font-bold text-blue-700 text-lg mb-3">4.1. Khái niệm và Lợi ích</h4>
@@ -988,10 +977,7 @@
                     },
                     {
                         id: 5,
-                        title: {
-                            vi: "Mảng (Arrays)",
-                            en: "Arrays"
-                        },
+                        title: { vi: "Mảng (Arrays)", en: "Arrays" },
                         theory: {
                             vi: `<div>
                                 <h4 class="font-bold text-blue-700 text-lg mb-3">5.1. Khái niệm Mảng</h4>
@@ -1325,10 +1311,7 @@
                     },
                     {
                         id: 6,
-                        title: {
-                            vi: "Chuỗi Ký Tự (Strings)",
-                            en: "Strings"
-                        },
+                        title: { vi: "Chuỗi Ký Tự (Strings)", en: "Strings" },
                         theory: {
                             vi: `<div>
                                 <h4 class="font-bold text-blue-700 text-lg mb-3">6.1. Bản chất của Chuỗi trong C</h4>
@@ -1502,10 +1485,7 @@
                     },
                     {
                         id: 7,
-                        title: {
-                            vi: "Kiểu Cấu trúc (Structs)",
-                            en: "Structs"
-                        },
+                        title: { vi: "Kiểu Cấu trúc (Structs)", en: "Structs" },
                         theory: {
                             vi: `<div>
                                 <h4 class="font-bold text-blue-700 text-lg mb-3">7.1. Tại sao cần Struct?</h4>
@@ -1645,10 +1625,7 @@
                     },
                     {
                         id: 8,
-                        title: {
-                            vi: "Bài tập Tổng hợp (Chương 1-7)",
-                            en: "Comprehensive Practice (Ch. 1-7)"
-                        },
+                        title: { vi: "Bài tập Tổng hợp (Chương 1-7)", en: "Comprehensive Practice (Ch. 1-7)" },
                         theory: {
                             vi: `<div>
                                 <h4 class="font-bold text-blue-700 text-lg mb-3">8.1. Tổng kết hành trình</h4>
@@ -1829,165 +1806,429 @@
                     },
                     {
                         id: 9,
-                        title: {
-                            vi: "Con trỏ cơ bản (Pointers)",
-                            en: "Pointers Basics"
-                        },
+                        title: { vi: "Con trỏ Cơ bản & Bản chất Bộ nhớ", en: "Pointers Basics & Memory" },
                         theory: {
                             vi: `<div>
-                                <h4 class="font-bold text-blue-700 text-lg mb-3">9.1. Con trỏ là gì?</h4>
-                                <p>Mỗi biến được lưu trữ tại một vị trí cụ thể trong bộ nhớ (Address). Con trỏ là biến đặc biệt dùng để lưu trữ địa chỉ của một biến khác.</p>
+                                <h4 class="font-bold text-blue-700 text-lg mb-3">9.1. Biến nằm ở đâu trong máy tính?</h4>
+                                <p>Để hiểu con trỏ, bạn phải hiểu RAM (Bộ nhớ truy cập ngẫu nhiên). RAM giống như một khách sạn khổng lồ chứa hàng tỷ căn phòng nhỏ (mỗi phòng là 1 byte). Mỗi căn phòng đều có một <strong>số nhà duy nhất (Địa chỉ - Address)</strong>, thường được viết dưới dạng số Hex (Hệ thập lục phân) để cho ngắn gọn, ví dụ: <code>0x20000004</code>.</p>
+                                <p>Khi bạn khai báo <code>int a = 10;</code>, máy tính sẽ thuê 4 căn phòng liên tiếp (vì <code>int</code> chiếm 4 bytes) và nhét số 10 vào đó. Nhãn "a" chỉ là tên gọi cho con người dễ nhớ, còn CPU chỉ làm việc với địa chỉ số nhà.</p>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.2. Khái niệm Con trỏ (Pointer)</h4>
+                                <p><strong>Con trỏ cũng chỉ là một biến bình thường.</strong> Tuy nhiên, thay vì lưu trữ giá trị như số 10 hay ký tự 'A', con trỏ chuyên dùng để <strong>lưu trữ địa chỉ "số nhà" của một biến khác.</strong></p>
+
+                                <!-- Hình ảnh minh hoạ SVG Con Trỏ -->
+                                <div class="bg-white border border-slate-200 rounded-2xl p-6 my-6 text-center shadow-sm overflow-x-auto">
+                                    <p class="text-sm font-bold text-slate-500 mb-6 uppercase tracking-widest">Minh họa: Con trỏ trong bộ nhớ RAM</p>
+                                    <svg viewBox="0 0 500 200" class="w-full max-w-xl mx-auto overflow-visible min-w-[450px]">
+                                        <defs>
+                                            <marker id="arrow-ptr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6" />
+                                            </marker>
+                                        </defs>
+
+                                        <!-- Biến a -->
+                                        <rect x="50" y="50" width="100" height="60" rx="8" class="fill-slate-50 stroke-slate-400 stroke-2"/>
+                                        <text x="100" y="40" text-anchor="middle" class="fill-slate-800 font-bold text-lg">int a = 10;</text>
+                                        <text x="100" y="85" text-anchor="middle" class="fill-slate-800 font-bold text-2xl">10</text>
+                                        <text x="100" y="130" text-anchor="middle" class="fill-red-500 font-mono text-sm font-bold">Addr: 0x2004</text>
+
+                                        <!-- Con trỏ p -->
+                                        <rect x="350" y="50" width="120" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                        <text x="410" y="40" text-anchor="middle" class="fill-blue-800 font-bold text-lg">int *p = &a;</text>
+                                        <text x="410" y="85" text-anchor="middle" class="fill-blue-700 font-mono font-bold text-xl">0x2004</text>
+                                        <text x="410" y="130" text-anchor="middle" class="fill-red-500 font-mono text-sm font-bold">Addr: 0x3008</text>
+
+                                        <!-- Mũi tên trỏ -->
+                                        <path d="M 350 80 C 270 80 250 80 160 80" fill="none" stroke="#3b82f6" stroke-width="3" stroke-dasharray="6,4" marker-end="url(#arrow-ptr)"/>
+                                    </svg>
+                                </div>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.3. Hai toán tử quan trọng nhất: <code>&</code> và <code>*</code></h4>
                                 <ul>
-                                    <li><strong>Lấy địa chỉ:</strong> Dùng toán tử <code>&amp;</code> (VD: <code>&amp;a</code> là địa chỉ biến a).</li>
-                                    <li><strong>Truy cập giá trị tại địa chỉ:</strong> Dùng toán tử <code>*</code> (VD: <code>*ptr</code> là giá trị mà con trỏ đang trỏ tới).</li>
+                                    <li><strong>Toán tử <code>&</code> (Address-of):</strong> Lấy địa chỉ của một biến. Ví dụ: <code>&a</code> (trả về 0x2004).</li>
+                                    <li><strong>Toán tử <code>*</code> (Dereference):</strong> Lấy giá trị tại địa chỉ mà con trỏ đang trỏ tới. Ví dụ: <code>*p</code> (tìm đến phòng 0x2004 và lấy ra số 10). Nếu bạn sửa <code>*p = 99;</code>, thì biến <code>a</code> gốc cũng sẽ bị đổi thành 99.</li>
                                 </ul>
 
-                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.2. Khai báo và Khởi tạo</h4>
-                                <p>Khai báo: <code>int *ptr;</code> (Con trỏ trỏ tới một số nguyên).</p>
-                                <p>Khởi tạo: <code>ptr = &amp;a;</code> (Gán địa chỉ của biến cho con trỏ).</p>
+                                <p class="text-[0.95rem] text-amber-800 bg-amber-50 p-4 rounded-xl border-l-4 border-amber-400 font-medium my-4">
+                                    <strong>Ghi chú cho Dân Nhúng (Embedded): Kích thước của Con trỏ</strong><br/>
+                                    Vì con trỏ lưu "địa chỉ", nên kích thước của con trỏ không phụ thuộc vào kiểu dữ liệu (int, char, float) mà phụ thuộc vào kiến trúc của vi điều khiển/CPU. Trên vi điều khiển 32-bit (như STM32, ESP32), mọi con trỏ đều tốn <strong>4 bytes</strong>. Trên máy tính 64-bit hiện đại, mọi con trỏ đều tốn <strong>8 bytes</strong>.
+                                </p>
 
-                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.3. Ứng dụng: Truyền tham chiếu (Pass by Reference)</h4>
-                                <p>Để hàm có thể thay đổi biến ở bên ngoài (như hàm Swap), ta phải truyền địa chỉ biến vào hàm và dùng con trỏ để nhận, sau đó thay đổi giá trị bằng cách dùng toán tử <code>*</code>.</p>
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.4. Con trỏ NULL (NULL Pointer)</h4>
+                                <p>Khi khai báo con trỏ mà chưa biết cho nó trỏ đi đâu, ta <strong>bắt buộc</strong> phải gán nó bằng <code>NULL</code>: <code>int *p = NULL;</code>. Nếu không gán, nó sẽ trở thành "Con trỏ hoang dã" (Wild Pointer), mang một địa chỉ rác ngẫu nhiên. Việc cố tình Dereference (<code>*p</code>) một con trỏ NULL sẽ làm sập chương trình (Segmentation Fault / Hard Fault).</p>
                             </div>`,
                             en: `<div>
-                                <h4 class="font-bold text-blue-700 text-lg mb-3">9.1. What is a Pointer?</h4>
-                                <p>Every variable is stored at a specific location in memory (Address). A pointer is a special variable used to store the memory address of another variable.</p>
+                                <h4 class="font-bold text-blue-700 text-lg mb-3">9.1. Where do variables live?</h4>
+                                <p>To understand pointers, you must understand RAM (Random Access Memory). Think of RAM as a giant hotel with billions of small rooms (each room is 1 byte). Every room has a <strong>unique house number (Address)</strong>, usually written in Hexadecimal for brevity, e.g., <code>0x20000004</code>.</p>
+                                <p>When you declare <code>int a = 10;</code>, the computer rents 4 consecutive rooms (since an <code>int</code> takes 4 bytes) and puts the number 10 inside. The label "a" is just for humans; the CPU only works with the numeric address.</p>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.2. Pointer Concept</h4>
+                                <p><strong>A pointer is just a normal variable.</strong> However, instead of storing a value like 10 or 'A', a pointer is dedicated to <strong>storing the "address" of another variable.</strong></p>
+
+                                <!-- Illustration SVG Pointer -->
+                                <div class="bg-white border border-slate-200 rounded-2xl p-6 my-6 text-center shadow-sm overflow-x-auto">
+                                    <p class="text-sm font-bold text-slate-500 mb-6 uppercase tracking-widest">Illustration: Pointer in RAM</p>
+                                    <svg viewBox="0 0 500 200" class="w-full max-w-xl mx-auto overflow-visible min-w-[450px]">
+                                        <defs>
+                                            <marker id="arrow-ptr-en" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6" />
+                                            </marker>
+                                        </defs>
+
+                                        <!-- Variable a -->
+                                        <rect x="50" y="50" width="100" height="60" rx="8" class="fill-slate-50 stroke-slate-400 stroke-2"/>
+                                        <text x="100" y="40" text-anchor="middle" class="fill-slate-800 font-bold text-lg">int a = 10;</text>
+                                        <text x="100" y="85" text-anchor="middle" class="fill-slate-800 font-bold text-2xl">10</text>
+                                        <text x="100" y="130" text-anchor="middle" class="fill-red-500 font-mono text-sm font-bold">Addr: 0x2004</text>
+
+                                        <!-- Pointer p -->
+                                        <rect x="350" y="50" width="120" height="60" rx="8" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                        <text x="410" y="40" text-anchor="middle" class="fill-blue-800 font-bold text-lg">int *p = &a;</text>
+                                        <text x="410" y="85" text-anchor="middle" class="fill-blue-700 font-mono font-bold text-xl">0x2004</text>
+                                        <text x="410" y="130" text-anchor="middle" class="fill-red-500 font-mono text-sm font-bold">Addr: 0x3008</text>
+
+                                        <!-- Arrow -->
+                                        <path d="M 350 80 C 270 80 250 80 160 80" fill="none" stroke="#3b82f6" stroke-width="3" stroke-dasharray="6,4" marker-end="url(#arrow-ptr-en)"/>
+                                    </svg>
+                                </div>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.3. The Two Most Important Operators: <code>&</code> and <code>*</code></h4>
                                 <ul>
-                                    <li><strong>Get Address:</strong> Use the <code>&amp;</code> operator (e.g., <code>&amp;a</code> is the address of a).</li>
-                                    <li><strong>Access Value at Address:</strong> Use the <code>*</code> operator (e.g., <code>*ptr</code> is the value the pointer is pointing to).</li>
+                                    <li><strong><code>&</code> Operator (Address-of):</strong> Gets the address of a variable. Ex: <code>&a</code> (returns 0x2004).</li>
+                                    <li><strong><code>*</code> Operator (Dereference):</strong> Gets the value at the address the pointer is holding. Ex: <code>*p</code> (goes to room 0x2004 and gets 10). If you write <code>*p = 99;</code>, the original variable <code>a</code> changes to 99.</li>
                                 </ul>
 
-                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.2. Declaration and Initialization</h4>
-                                <p>Declaration: <code>int *ptr;</code> (Pointer to an integer).</p>
-                                <p>Initialization: <code>ptr = &amp;a;</code> (Assign the variable's address to the pointer).</p>
+                                <p class="text-[0.95rem] text-amber-800 bg-amber-50 p-4 rounded-xl border-l-4 border-amber-400 font-medium my-4">
+                                    <strong>Embedded Note: Size of Pointers</strong><br/>
+                                    Because a pointer stores an "address", its size does not depend on the data type (int, char, float) but on the CPU architecture. On a 32-bit MCU (like STM32, ESP32), all pointers take <strong>4 bytes</strong>. On a modern 64-bit PC, all pointers take <strong>8 bytes</strong>.
+                                </p>
 
-                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.3. Application: Pass by Reference</h4>
-                                <p>For a function to modify an external variable (like a Swap function), we must pass the address into the function, catch it with a pointer, and change the value using the <code>*</code> operator.</p>
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">9.4. NULL Pointers</h4>
+                                <p>If you declare a pointer but don't know where it should point yet, you <strong>must</strong> initialize it to <code>NULL</code>: <code>int *p = NULL;</code>. Otherwise, it becomes a "Wild Pointer", holding a random garbage address. Attempting to dereference (<code>*p</code>) a NULL pointer will crash your program (Segmentation Fault / Hard Fault).</p>
                             </div>`
                         },
                         codeExamples: [
                             {
-                                title: { vi: "Ví dụ 1: Con trỏ cơ bản", en: "Example 1: Basic Pointers" },
-                                code: `#include <stdio.h>\n\nvoid doubleValue(int *p) {\n    // Change value at the address pointed to by p\n    *p = *p * 2;\n}\n\nint main() {\n    int num = 15;\n    int *ptr = &num; // ptr stores the address of num\n\n    printf("Initial value: %d\\n", num);\n    printf("Memory Address: %p\\n", ptr);\n\n    // Pass address to function\n    doubleValue(&num);\n    \n    printf("After function call: %d\\n", num);\n    return 0;\n}`,
-                                output: `Initial value: 15\nMemory Address: 0x7ffd1234\nAfter function call: 30`
+                                title: { vi: "Ví dụ 1: Khai báo, Truy xuất và Đổi giá trị qua con trỏ", en: "Example 1: Declare, Access, and Modify via Pointer" },
+                                code: `#include <stdio.h>\n\nint main() {\n    int a = 10;\n    int *ptr = &a; // ptr bay gio luu dia chi cua a\n\n    printf("1. Ban dau:\\n");\n    printf("   Gia tri cua a: %d\\n", a);\n    printf("   Dia chi cua a (&a): %p\\n", (void*)&a); // %p dung de in dia chi (Hex)\n    printf("   Gia tri ma ptr luu giu: %p\\n", (void*)ptr);\n    printf("   Gia tri *ptr tro toi: %d\\n", *ptr);\n\n    // Thay doi gia tri a thong qua con tro ptr\n    *ptr = 99;\n\n    printf("\\n2. Sau khi *ptr = 99:\\n");\n    printf("   Gia tri cua a thay doi thanh: %d\\n", a);\n    \n    // Kich thuoc con tro\n    printf("\\n3. Kich thuoc tren RAM:\\n");\n    printf("   sizeof(a)   = %lu bytes\\n", sizeof(a));\n    printf("   sizeof(ptr) = %lu bytes (Phu thuoc CPU 32 hay 64-bit)\\n", sizeof(ptr));\n\n    return 0;\n}`,
+                                output: `1. Ban dau:\n   Gia tri cua a: 10\n   Dia chi cua a (&a): 0x7ffeeb8c10ac\n   Gia tri ma ptr luu giu: 0x7ffeeb8c10ac\n   Gia tri *ptr tro toi: 10\n\n2. Sau khi *ptr = 99:\n   Gia tri cua a thay doi thanh: 99\n\n3. Kich thuoc tren RAM:\n   sizeof(a)   = 4 bytes\n   sizeof(ptr) = 8 bytes (Phu thuoc CPU 32 hay 64-bit)`
+                            },
+                            {
+                                title: { vi: "Ví dụ 2: Ứng dụng quan trọng (Truyền Tham Chiếu - Pass by Reference)", en: "Example 2: Crucial Application (Pass by Reference)" },
+                                code: `#include <stdio.h>\n\n// Ham nay khong dung con tro (Call by Value)\nvoid failSwap(int x, int y) {\n    int temp = x;\n    x = y;\n    y = temp;\n}\n\n// Ham nay dung con tro (Pass by Reference)\nvoid realSwap(int *pX, int *pY) {\n    int temp = *pX;\n    *pX = *pY;\n    *pY = temp;\n}\n\nint main() {\n    int a = 5, b = 10;\n    \n    printf("Truoc khi goi ham: a = %d, b = %d\\n", a, b);\n    \n    failSwap(a, b);\n    printf("Sau khi failSwap : a = %d, b = %d (Khong doi vi chi copy gia tri)\\n", a, b);\n    \n    // De realSwap co the tim den dung phong cua a va b, phai truyen &a, &b\n    realSwap(&a, &b);\n    printf("Sau khi realSwap : a = %d, b = %d (Gia tri that su bi doi)\\n", a, b);\n\n    return 0;\n}`,
+                                output: `Truoc khi goi ham: a = 5, b = 10\nSau khi failSwap : a = 5, b = 10 (Khong doi vi chi copy gia tri)\nSau khi realSwap : a = 10, b = 5 (Gia tri that su bi doi)`
                             }
                         ],
                         exercises: [
-                            { id: "Bài 9.1", title: { vi: "In giá trị qua con trỏ (Dễ)", en: "Print via pointer (Easy)" }, desc: { vi: "Khai báo biến float temp = 36.5. Khai báo một con trỏ pTemp trỏ tới temp. In ra giá trị của temp thông qua con trỏ pTemp.", en: "Declare float temp = 36.5. Declare pointer pTemp pointing to temp. Print temp's value through pointer pTemp." }, io: { vi: "Output:\nGia tri nhiet do: 36.5", en: "Output:\nTemp value: 36.5" }, solution: `#include <stdio.h>\n\nint main() {\n    float temp = 36.5;\n    float *pTemp = &temp;\n    \n    printf("Temp value (via var): %.1f\\n", temp);\n    printf("Temp value (via pointer): %.1f\\n", *pTemp);\n    return 0;\n}` },
-                            { id: "Bài 9.2", title: { vi: "Hàm Hoán Vị (TB)", en: "Swap Function (Med)" }, desc: { vi: "Viết lại hàm Hoán Vị (Swap) hai số nguyên sử dụng con trỏ (Đã có ở ví dụ Chương 4, ôn tập lại).", en: "Rewrite the Swap function for two integers using pointers (Review from Chapter 4)." }, io: { vi: "Input: a=5, b=10\nOutput: a=10, b=5", en: "Input: a=5, b=10\nOutput: a=10, b=5" }, solution: `#include <stdio.h>\n\nvoid swap(int *a, int *b) {\n    int temp = *a;\n    *a = *b;\n    *b = temp;\n}\n\nint main() {\n    int x = 5, y = 10;\n    swap(&x, &y);\n    printf("After swap: x=%d, y=%d\\n", x, y);\n    return 0;\n}` }
+                            { id: "Bài 9.1", title: { vi: "Toán tử Cơ bản (Dễ)", en: "Basic Operators (Easy)" }, desc: { vi: "Khai báo biến float nhietDo = 36.5. Khai báo một con trỏ trỏ tới biến này. In ra giá trị của nhietDo thông qua con trỏ. Sau đó cập nhật nhietDo thành 37.2 thông qua con trỏ và in lại biến nhietDo gốc.", en: "Declare float nhietDo = 36.5. Declare a pointer to it. Print the value through the pointer. Update it to 37.2 via the pointer and print the original variable." }, io: { vi: "Output:\n*ptr = 36.5\nSau khi cap nhat nhietDo: 37.2", en: "Output:\n*ptr = 36.5\nAfter update nhietDo: 37.2" }, solution: `#include <stdio.h>\n\nint main() {\n    float nhietDo = 36.5;\n    float *ptr = &nhietDo;\n    \n    printf("*ptr = %.1f\\n", *ptr);\n    \n    *ptr = 37.2;\n    printf("Sau khi cap nhat nhietDo: %.1f\\n", nhietDo);\n    return 0;\n}` },
+                            { id: "Bài 9.2", title: { vi: "Chia kẹo với Tham chiếu (TB)", en: "Candy Share with Reference (Med)" }, desc: { vi: "Viết hàm <code>void chiaKeo(int *soKeo, int *banA, int *banB)</code>. Hàm này sẽ lấy một nửa <code>soKeo</code> chia cho <code>banA</code>, nửa còn lại chia cho <code>banB</code>, và cập nhật số kẹo còn lại bằng 0. Trình bày trong hàm main.", en: "Write function <code>void shareCandy(int *candy, int *a, int *b)</code>. Give half to a, half to b, and set remaining candy to 0. Test in main." }, io: { vi: "Input: Keo=10, A=0, B=0\nOutput: Keo=0, A=5, B=5", en: "Input: Candy=10, A=0, B=0\nOutput: Candy=0, A=5, B=5" }, solution: `#include <stdio.h>\n\nvoid chiaKeo(int *soKeo, int *banA, int *banB) {\n    int nua = *soKeo / 2;\n    *banA += nua;\n    *banB += (*soKeo - nua); // in case it's odd\n    *soKeo = 0;\n}\n\nint main() {\n    int keo = 10, a = 0, b = 0;\n    chiaKeo(&keo, &a, &b);\n    printf("Keo=%d, A=%d, B=%d\\n", keo, a, b);\n    return 0;\n}` }
+                        ]
+                    },
+                    {
+                        id: 10,
+                        title: { vi: "Con trỏ & Mảng, Con trỏ Đa cấp", en: "Pointers & Arrays, Double Pointers" },
+                        theory: {
+                            vi: `<div>
+                                <h4 class="font-bold text-blue-700 text-lg mb-3">10.1. Toán học Con trỏ (Pointer Arithmetic)</h4>
+                                <p>Vì con trỏ lưu địa chỉ (là các con số), ta có thể cộng trừ trên con trỏ. Tuy nhiên, <code>ptr + 1</code> KHÔNG có nghĩa là tăng địa chỉ lên 1 byte. Nó có nghĩa là: <strong>Tiến tới phần tử tiếp theo cùng kiểu dữ liệu.</strong></p>
+                                <ul>
+                                    <li>Nếu <code>char *p = 0x1000;</code> thì <code>p + 1</code> sẽ là <code>0x1001</code> (vì char chiếm 1 byte).</li>
+                                    <li>Nếu <code>int *p = 0x1000;</code> thì <code>p + 1</code> sẽ là <code>0x1004</code> (vì int chiếm 4 byte). Bước nhảy do trình biên dịch tự tính toán dựa vào kiểu dữ liệu!</li>
+                                </ul>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">10.2. Mối quan hệ mật thiết giữa Mảng và Con trỏ</h4>
+                                <p>Trong C, <strong>Tên của một mảng bản chất là một hằng con trỏ</strong> trỏ tới phần tử đầu tiên (index 0) của mảng đó.</p>
+
+                                <!-- Hình ảnh minh hoạ Mảng & Con trỏ -->
+                                <div class="bg-white border border-slate-200 rounded-2xl p-6 my-6 text-center shadow-sm overflow-x-auto">
+                                    <p class="text-sm font-bold text-slate-500 mb-6 uppercase tracking-widest">Minh họa: Tên mảng là Con trỏ tới arr[0]</p>
+                                    <svg viewBox="0 0 550 150" class="w-full max-w-2xl mx-auto overflow-visible min-w-[500px]">
+                                        <g transform="translate(60, 50)">
+                                            <!-- Mảng arr -->
+                                            <!-- Ô 0 -->
+                                            <rect x="0" y="0" width="80" height="60" rx="4" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="40" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">*(arr+0)</text>
+                                            <text x="40" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-xl">10</text>
+                                            <text x="40" y="75" text-anchor="middle" class="fill-red-500 font-mono text-[11px] font-bold">0x100</text>
+                                            
+                                            <!-- Ô 1 -->
+                                            <rect x="100" y="0" width="80" height="60" rx="4" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="140" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">*(arr+1)</text>
+                                            <text x="140" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-xl">20</text>
+                                            <text x="140" y="75" text-anchor="middle" class="fill-red-500 font-mono text-[11px] font-bold">0x104</text>
+                                            
+                                            <!-- Ô 2 -->
+                                            <rect x="200" y="0" width="80" height="60" rx="4" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="240" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">*(arr+2)</text>
+                                            <text x="240" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-xl">30</text>
+                                            <text x="240" y="75" text-anchor="middle" class="fill-red-500 font-mono text-[11px] font-bold">0x108</text>
+
+                                            <!-- Tên mảng tro -->
+                                            <text x="-40" y="36" text-anchor="middle" class="fill-slate-800 font-mono font-bold text-xl">arr</text>
+                                            <path d="M -20 30 L -5 30" fill="none" stroke="#3b82f6" stroke-width="3" marker-end="url(#arrow-ptr)"/>
+                                        </g>
+                                    </svg>
+                                </div>
+                                <p>Vì vậy, hai cách viết sau đây là hoàn toàn tương đương, máy tính dịch ra mã máy giống hệt nhau:</p>
+                                <ul>
+                                    <li>Cú pháp mảng: <code>arr[2]</code></li>
+                                    <li>Cú pháp con trỏ: <code>*(arr + 2)</code></li>
+                                </ul>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">10.3. Chuỗi là Con trỏ Char</h4>
+                                <p>Vì chuỗi là mảng ký tự, nên con trỏ thường được dùng để quét chuỗi rất hiệu quả. <br>
+                                Cảnh báo: Khai báo <code>char str[] = "Hello";</code> (Mảng) cho phép bạn sửa từng ký tự. Nhưng khai báo <code>char *str = "Hello";</code> (Con trỏ hằng chuỗi) thì chuỗi này sẽ bị đẩy vào vùng nhớ Read-Only (Chỉ đọc), nếu bạn cố sửa <code>str[0] = 'M'</code> chương trình sẽ Crash ngay lập tức.</p>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">10.4. Con trỏ trỏ tới Con trỏ (Double Pointer: <code>**ptr</code>)</h4>
+                                <p>Thỉnh thoảng, bạn cần lưu trữ địa chỉ của một... con trỏ khác. Đó là lúc dùng con trỏ đa cấp (như <code>**ptr</code>). <br>
+                                Ứng dụng phổ biến nhất: Dùng làm tham số trong hàm để thay đổi hướng trỏ của con trỏ gốc, hoặc dùng trong việc cấp phát mảng 2 chiều động.</p>
+                            </div>`,
+                            en: `<div>
+                                <h4 class="font-bold text-blue-700 text-lg mb-3">10.1. Pointer Arithmetic</h4>
+                                <p>Because pointers store addresses (numbers), we can add or subtract them. However, <code>ptr + 1</code> DOES NOT mean adding 1 byte to the address. It means: <strong>Advance to the next element of the same data type.</strong></p>
+                                <ul>
+                                    <li>If <code>char *p = 0x1000;</code> then <code>p + 1</code> is <code>0x1001</code> (char is 1 byte).</li>
+                                    <li>If <code>int *p = 0x1000;</code> then <code>p + 1</code> is <code>0x1004</code> (int is 4 bytes). The jump size is calculated by the compiler!</li>
+                                </ul>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">10.2. Arrays and Pointers Relationship</h4>
+                                <p>In C, <strong>the name of an array is essentially a constant pointer</strong> pointing to its first element (index 0).</p>
+
+                                <!-- Illustration Arrays & Pointers -->
+                                <div class="bg-white border border-slate-200 rounded-2xl p-6 my-6 text-center shadow-sm overflow-x-auto">
+                                    <p class="text-sm font-bold text-slate-500 mb-6 uppercase tracking-widest">Illustration: Array name points to arr[0]</p>
+                                    <svg viewBox="0 0 550 150" class="w-full max-w-2xl mx-auto overflow-visible min-w-[500px]">
+                                        <g transform="translate(60, 50)">
+                                            <!-- Array arr -->
+                                            <!-- Cell 0 -->
+                                            <rect x="0" y="0" width="80" height="60" rx="4" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="40" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">*(arr+0)</text>
+                                            <text x="40" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-xl">10</text>
+                                            <text x="40" y="75" text-anchor="middle" class="fill-red-500 font-mono text-[11px] font-bold">0x100</text>
+                                            
+                                            <!-- Cell 1 -->
+                                            <rect x="100" y="0" width="80" height="60" rx="4" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="140" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">*(arr+1)</text>
+                                            <text x="140" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-xl">20</text>
+                                            <text x="140" y="75" text-anchor="middle" class="fill-red-500 font-mono text-[11px] font-bold">0x104</text>
+                                            
+                                            <!-- Cell 2 -->
+                                            <rect x="200" y="0" width="80" height="60" rx="4" class="fill-blue-50 stroke-blue-500 stroke-2"/>
+                                            <text x="240" y="-12" text-anchor="middle" class="fill-slate-500 font-mono text-[12px] font-bold">*(arr+2)</text>
+                                            <text x="240" y="36" text-anchor="middle" class="fill-blue-700 font-bold text-xl">30</text>
+                                            <text x="240" y="75" text-anchor="middle" class="fill-red-500 font-mono text-[11px] font-bold">0x108</text>
+
+                                            <!-- Array name pointer -->
+                                            <text x="-40" y="36" text-anchor="middle" class="fill-slate-800 font-mono font-bold text-xl">arr</text>
+                                            <path d="M -20 30 L -5 30" fill="none" stroke="#3b82f6" stroke-width="3" marker-end="url(#arrow-ptr-en)"/>
+                                        </g>
+                                    </svg>
+                                </div>
+                                <p>Therefore, these two syntaxes are completely equivalent and compile to the same machine code:</p>
+                                <ul>
+                                    <li>Array syntax: <code>arr[2]</code></li>
+                                    <li>Pointer syntax: <code>*(arr + 2)</code></li>
+                                </ul>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">10.3. Strings are Char Pointers</h4>
+                                <p>Since strings are char arrays, pointers are used heavily to parse them. <br>
+                                Warning: <code>char str[] = "Hello";</code> (Array) allows modification. But <code>char *str = "Hello";</code> (String Literal Pointer) places the string in Read-Only Memory. Trying to execute <code>str[0] = 'M'</code> will cause a Crash.</p>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">10.4. Double Pointers (<code>**ptr</code>)</h4>
+                                <p>Sometimes you need to store the address of... another pointer. That's a double pointer. <br>
+                                Most common uses: Passing a pointer into a function to change where it points, or dynamically allocating 2D arrays.</p>
+                            </div>`
+                        },
+                        codeExamples: [
+                            {
+                                title: { vi: "Ví dụ 1: Duyệt mảng bằng Toán học Con trỏ", en: "Example 1: Iterate Array with Pointer Math" },
+                                code: `#include <stdio.h>\n\nint main() {\n    int arr[] = {10, 20, 30, 40, 50};\n    int size = sizeof(arr) / sizeof(arr[0]);\n\n    // Tên mảng (arr) chính là địa chỉ phần tử đầu tiên\n    int *ptr = arr; \n\n    printf("Duyet mang bang con tro:\\n");\n    for (int i = 0; i < size; i++) {\n        // ptr + i: Tinh tien dia chi (moi buoc nhay 4 bytes)\n        // *(ptr + i): Lay gia tri tai dia chi do\n        printf("Dia chi: %p, Gia tri: %d\\n", (void*)(ptr + i), *(ptr + i));\n    }\n\n    // Cach viet rut gon thuong thay:\n    printf("\\nQuet nhanh chuoi ky tu bang con tro++:\\n");\n    char name[] = "Embedded";\n    char *cPtr = name;\n    \n    // Lap den khi gap ky tu NULL '\\0' (co gia tri la 0 - tuong duong False)\n    while (*cPtr != '\\0') {\n        printf("%c-", *cPtr);\n        cPtr++; // Dich con tro len 1 byte\n    }\n    printf("\\n");\n\n    return 0;\n}`,
+                                output: `Duyet mang bang con tro:\nDia chi: 0x7ffe..., Gia tri: 10\nDia chi: 0x7ffe..., Gia tri: 20\n...\nQuet nhanh chuoi ky tu bang con tro++:\nE-m-b-e-d-d-e-d-`
+                            },
+                            {
+                                title: { vi: "Ví dụ 2: Con trỏ Đa cấp (**ptr)", en: "Example 2: Double Pointers" },
+                                code: `#include <stdio.h>\n\nint main() {\n    int a = 100;\n    int *p = &a;       // p luu dia chi cua a\n    int **dp = &p;     // dp luu dia chi cua con tro p\n\n    printf("Gia tri cua a: %d\\n", a);\n    printf("Lay qua *p: %d\\n", *p);\n    printf("Lay qua **dp: %d\\n", **dp);\n\n    **dp = 200;\n    printf("Gia tri cua a sau khi doi: %d\\n", a);\n    return 0;\n}`,
+                                output: `Gia tri cua a: 100\nLay qua *p: 100\nLay qua **dp: 100\nGia tri cua a sau khi doi: 200`
+                            }
+                        ],
+                        exercises: [
+                            { id: "Bài 10.1", title: { vi: "Truy cập mảng bằng con trỏ (TB)", en: "Array Access via Pointer (Med)" }, desc: { vi: "Khởi tạo mảng int arr[5] = {1, 2, 3, 4, 5}. Dùng một con trỏ ptr trỏ tới arr. Viết vòng lặp để tính tổng các phần tử trong mảng chỉ bằng cách sử dụng toán tử con trỏ (không dùng arr[i]).", en: "Initialize int arr[5] = {1, 2, 3, 4, 5}. Use a pointer ptr to point to arr. Write a loop to calculate the sum of elements using only pointer arithmetic (no arr[i])." }, io: { vi: "Output: Tong = 15", en: "Output: Sum = 15" }, solution: `#include <stdio.h>\n\nint main() {\n    int arr[5] = {1, 2, 3, 4, 5};\n    int *ptr = arr;\n    int sum = 0;\n    \n    for(int i = 0; i < 5; i++) {\n        sum += *(ptr + i);\n    }\n    \n    printf("Tong = %d\\n", sum);\n    return 0;\n}` }
+                        ]
+                    },
+                    {
+                        id: 11,
+                        title: { vi: "Con trỏ nâng cao cho Embedded/IoT", en: "Advanced Pointers for Embedded" },
+                        theory: {
+                            vi: `<div>
+                                <h4 class="font-bold text-blue-700 text-lg mb-3">11.1. Ép kiểu địa chỉ & Thanh ghi (Registers)</h4>
+                                <p>Trong vi điều khiển (VD: STM32, PIC), các chân cắm (PIN) hoặc tính năng phần cứng được điều khiển bằng cách ghi dữ liệu vào các vùng nhớ đặc biệt gọi là <strong>Thanh ghi (Register)</strong>. Các thanh ghi này nằm ở những địa chỉ vật lý cố định (Hardcoded Address) do nhà sản xuất quy định.</p>
+                                <p>Để thao tác, ta phải lấy một số nguyên (địa chỉ) ép kiểu thành con trỏ, rồi dùng toán tử <code>*</code> để ghi giá trị vào đó:</p>
+                                <pre class="bg-slate-100 p-4 rounded-xl font-mono text-[0.9em] border border-slate-200 mt-2">
+// Gia su thanh ghi dieu khien LED nam o dia chi 0x40020C14
+#define LED_PORT_ADDR 0x40020C14
+#define LED_REGISTER  (*((volatile unsigned int *)LED_PORT_ADDR))
+
+// Bat LED bang cach ghi gia tri 1 vao thanh ghi
+LED_REGISTER = 1;
+                                </pre>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">11.2. Từ khóa <code>volatile</code> (Cực kỳ quan trọng)</h4>
+                                <p>Trình biên dịch C rất thông minh, nó có bộ tối ưu hóa (Optimizer). Nếu thấy một biến không bị thay đổi trong code, nó sẽ lưu biến đó vào cache (hoặc thanh ghi CPU) để đọc cho nhanh thay vì đọc từ RAM liên tục.</p>
+                                <p>Tuy nhiên, trong Embedded, giá trị của Thanh ghi có thể bị thay đổi <strong>bất ngờ từ bên ngoài</strong> (bởi phần cứng, nút nhấn, cảm biến) mà phần mềm không biết. Nếu code đọc từ cache, nó sẽ nhận giá trị cũ sai lệch. Từ khóa <code>volatile</code> ép trình biên dịch <strong>phải luôn luôn đọc giá trị biến trực tiếp từ RAM</strong> mỗi lần sử dụng.</p>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">11.3. Con trỏ Struct (Sử dụng toán tử <code>-&gt;</code>)</h4>
+                                <p>Khi truyền một Struct vào hàm, để tránh copy cả mảng dữ liệu lớn, ta thường truyền <strong>địa chỉ của Struct</strong> (Con trỏ Struct). Để truy cập thuộc tính của Struct qua con trỏ, ta dùng toán tử mũi tên <code>-&gt;</code> thay vì dấu chấm <code>.</code>.</p>
+                                <ul>
+                                    <li>Với biến thường: <code>hs1.id = 1;</code></li>
+                                    <li>Với con trỏ: <code>ptr-&gt;id = 1;</code> (tương đương với <code>(*ptr).id = 1;</code> nhưng ngắn gọn hơn).</li>
+                                </ul>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">11.4. Con trỏ Hàm (Function Pointers & Callbacks)</h4>
+                                <p>Cũng giống như mảng, tên của một hàm bản chất là địa chỉ của khối lệnh đó trong bộ nhớ mã (Code Segment). Ta có thể dùng "Con trỏ hàm" để lưu địa chỉ này.</p>
+                                <p>Ứng dụng: Dùng làm <strong>Hàm Callback</strong> trong các ngắt (Interrupts) hoặc sự kiện (Events) của hệ thống nhúng (Ví dụ: Khi nhấn nút thì gọi hàm A, khi cảm biến ngắt thì gọi hàm B).</p>
+                                <pre class="bg-slate-100 p-4 rounded-xl font-mono text-[0.9em] border border-slate-200 mt-2">
+// Khai bao con tro ham co kieu tra ve la void, khong co tham so
+void (*buttonCallback)(); 
+                                </pre>
+                            </div>`,
+                            en: `<div>
+                                <h4 class="font-bold text-blue-700 text-lg mb-3">11.1. Hardware Address Casting & Registers</h4>
+                                <p>In microcontrollers (e.g., STM32, ESP32), hardware pins or features are controlled by writing data to special memory locations called <strong>Registers</strong>. These registers reside at fixed physical addresses specified by the manufacturer.</p>
+                                <p>To manipulate them, we cast an integer (the address) into a pointer, then dereference it with <code>*</code> to write a value:</p>
+                                <pre class="bg-slate-100 p-4 rounded-xl font-mono text-[0.9em] border border-slate-200 mt-2">
+// Assume LED control register is at 0x40020C14
+#define LED_PORT_ADDR 0x40020C14
+#define LED_REGISTER  (*((volatile unsigned int *)LED_PORT_ADDR))
+
+// Turn on LED by writing 1 to the register
+LED_REGISTER = 1;
+                                </pre>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">11.2. The <code>volatile</code> Keyword (Crucial)</h4>
+                                <p>C compilers are smart and have optimizers. If they see a variable hasn't changed in the code flow, they might cache it (in CPU registers) to speed up reads instead of fetching from RAM every time.</p>
+                                <p>However, in Embedded Systems, a Register's value can change <strong>unexpectedly from the outside</strong> (by hardware, buttons, sensors). If the code reads from the cache, it gets outdated data. The <code>volatile</code> keyword forces the compiler to <strong>always read the variable directly from RAM</strong> every single time.</p>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">11.3. Struct Pointers (Using <code>-&gt;</code> operator)</h4>
+                                <p>When passing a Struct to a function, to avoid copying a large chunk of memory, we pass the <strong>address of the Struct</strong> (Struct Pointer). To access members via a pointer, we use the arrow operator <code>-&gt;</code> instead of the dot <code>.</code>.</p>
+                                <ul>
+                                    <li>Normal variable: <code>s1.id = 1;</code></li>
+                                    <li>Pointer: <code>ptr-&gt;id = 1;</code> (Equivalent to <code>(*ptr).id = 1;</code> but cleaner).</li>
+                                </ul>
+
+                                <h4 class="font-bold text-blue-700 text-lg mt-8 mb-3">11.4. Function Pointers & Callbacks</h4>
+                                <p>Just like arrays, the name of a function is essentially the memory address of its code block. We can use "Function Pointers" to store this address.</p>
+                                <p>Use cases: <strong>Callbacks</strong> in hardware Interrupts or Event-driven systems (e.g., When a button is pressed, execute function A).</p>
+                                <pre class="bg-slate-100 p-4 rounded-xl font-mono text-[0.9em] border border-slate-200 mt-2">
+// Declare a function pointer returning void, taking no arguments
+void (*buttonCallback)(); 
+                                </pre>
+                            </div>`
+                        },
+                        codeExamples: [
+                            {
+                                title: { vi: "Ví dụ 1: Con trỏ Struct (Toán tử ->)", en: "Example 1: Struct Pointers (-> operator)" },
+                                code: `#include <stdio.h>\n#include <string.h>\n\ntypedef struct {\n    int pinNumber;\n    char pinName[20];\n    int state; // 0: LOW, 1: HIGH\n} GPIO_Pin;\n\n// Pass by reference using Struct Pointer to avoid memory copy\n// and allow modifying the original struct\nvoid togglePin(GPIO_Pin *pinPtr) {\n    // Use -> to access members of a struct pointer\n    if (pinPtr->state == 0) {\n        pinPtr->state = 1;\n    } else {\n        pinPtr->state = 0;\n    }\n    printf("Pin %s (Pin %d) toggled to %s\\n", \n           pinPtr->pinName, pinPtr->pinNumber, pinPtr->state ? "HIGH" : "LOW");\n}\n\nint main() {\n    GPIO_Pin led1 = {13, "USER_LED", 0};\n    \n    printf("Initial State: %d\\n", led1.state);\n    \n    // Pass the address of the struct\n    togglePin(&led1);\n    togglePin(&led1);\n    \n    return 0;\n}`,
+                                output: `Initial State: 0\nPin USER_LED (Pin 13) toggled to HIGH\nPin USER_LED (Pin 13) toggled to LOW`
+                            },
+                            {
+                                title: { vi: "Ví dụ 2: Con trỏ Hàm (Callback trong Interrupt)", en: "Example 2: Function Pointers (Interrupt Callback)" },
+                                code: `#include <stdio.h>\n\n// 1. Declare a function pointer type for readability\ntypedef void (*InterruptCallback)();\n\n// 2. Some user-defined functions\nvoid turnOnLED() {\n    printf("=> ACTION: LED turned ON!\\n");\n}\n\nvoid soundBuzzer() {\n    printf("=> ACTION: Buzzer is sounding! Beep!\\n");\n}\n\n// 3. Hardware simulation function (Interrupt Handler)\n// It accepts a function pointer to know what to execute\nvoid onButtonPress(InterruptCallback callback) {\n    printf("Hardware: Button was pressed! Executing callback...\\n");\n    if (callback != NULL) {\n        callback(); // Execute the passed function\n    }\n}\n\nint main() {\n    printf("--- Test 1: Link Button to LED ---\\n");\n    onButtonPress(turnOnLED);\n    \n    printf("\\n--- Test 2: Change Button link to Buzzer ---\\n");\n    onButtonPress(soundBuzzer);\n\n    return 0;\n}`,
+                                output: `--- Test 1: Link Button to LED ---\nHardware: Button was pressed! Executing callback...\n=> ACTION: LED turned ON!\n\n--- Test 2: Change Button link to Buzzer ---\nHardware: Button was pressed! Executing callback...\n=> ACTION: Buzzer is sounding! Beep!`
+                            }
+                        ],
+                        exercises: [
+                            { id: "Bài 11.1", title: { vi: "Cấu hình Sensor (Struct Pointer)", en: "Sensor Config (Struct Pointer)" }, desc: { vi: "Tạo Struct `Sensor` gồm id, value. Viết hàm `void readSensor(Sensor *s)` dùng để mô phỏng đọc cảm biến: thay đổi value của struct thông qua con trỏ (ví dụ gán value = 55). Trong main, khởi tạo sensor, gọi hàm và in kết quả.", en: "Create `Sensor` Struct (id, value). Write `void readSensor(Sensor *s)` to simulate reading: update the value via pointer to 55. In main, init sensor, call function, and print." }, io: { vi: "Output:\nBefore: value = 0\nAfter read: value = 55", en: "Output:\nBefore: value = 0\nAfter read: value = 55" }, solution: `#include <stdio.h>\n\ntypedef struct {\n    int id;\n    int value;\n} Sensor;\n\nvoid readSensor(Sensor *s) {\n    // Simulate hardware reading\n    s->value = 55;\n}\n\nint main() {\n    Sensor tempSensor = {1, 0};\n    printf("Before: value = %d\\n", tempSensor.value);\n    \n    readSensor(&tempSensor);\n    \n    printf("After read: value = %d\\n", tempSensor.value);\n    return 0;\n}` }
                         ]
                     }
                 ];
 
-                // --- TỪ ĐIỂN ĐA NGÔN NGỮ ---
-                const t = {
-                    vi: {
-                        content: "NỘI DUNG",
-                        courseTitle: "Lập Trình C Cơ Bản",
-                        theory: "Kiến thức trọng tâm",
-                        example: "Mã nguồn minh họa",
-                        exercises: "Bài tập thực hành",
-                        runBtn: "Khởi chạy",
-                        outputTab: "Màn hình Console",
-                        showSol: "Xem bài giải",
-                        hideSol: "Đóng bài giải",
-                        prev: "Chương trước",
-                        next: "Chương tiếp theo",
-                        chapList: "Mục lục giáo trình",
-                        downloadBtn: "Tải bản Word",
-                        chapterPrefix: "Chương",
-                        codeExampleTitle: "Mã nguồn minh họa",
-                        exerciseTitle: "Bài tập và Đáp án",
-                        ioHint: "Gợi ý Input/Output:",
-                        filename: "Tong_Hop_Kien_Thuc_C.doc",
+                const labels = computed(() => {
+                    return lang.value === 'vi' ? {
+                        courseTitle: "Học Lập Trình C Cơ Bản",
+                        downloadBtn: "Tải Tài Liệu (Word)",
+                        chapList: "DANH SÁCH CHƯƠNG",
+                        theory: "Lý thuyết & Khái niệm",
+                        example: "Ví dụ Minh họa",
+                        exercises: "Bài tập Thực hành",
+                        showSol: "Xem Lời Giải",
+                        hideSol: "Ẩn Lời Giải",
+                        runBtn: "Chạy Code",
                         copyBtn: "Copy",
-                        copiedBtn: "Đã chép",
-                        summaryTitle: "TỔNG HỢP KIẾN THỨC TRỌNG TÂM - LẬP TRÌNH C"
-                    },
-                    en: {
-                        content: "CONTENTS",
+                        copiedBtn: "Đã Copy",
+                        prev: "Chương Trước",
+                        next: "Chương Tiếp",
+                        outputTab: "Kết quả (Output)",
+                        chapterPrefix: "Chương",
+                        content: "Nội Dung"
+                    } : {
                         courseTitle: "Basic C Programming",
-                        theory: "Theory Focus",
-                        example: "Source Code Example",
-                        exercises: "Practical Exercises",
-                        runBtn: "Run Code",
-                        outputTab: "Console Output",
+                        downloadBtn: "Download (Word)",
+                        chapList: "CHAPTER LIST",
+                        theory: "Theory & Concepts",
+                        example: "Code Examples",
+                        exercises: "Practice Exercises",
                         showSol: "Show Solution",
                         hideSol: "Hide Solution",
-                        prev: "Previous Chapter",
-                        next: "Next Chapter",
-                        chapList: "Course Index",
-                        downloadBtn: "Download Word",
-                        chapterPrefix: "Chapter",
-                        codeExampleTitle: "Source Code Example",
-                        exerciseTitle: "Exercises and Solutions",
-                        ioHint: "Input/Output Hint:",
-                        filename: "Core_C_Knowledge_Summary.doc",
+                        runBtn: "Run Code",
                         copyBtn: "Copy",
-                        copiedBtn: "Copied!",
-                        summaryTitle: "CORE KNOWLEDGE SUMMARY - C PROGRAMMING"
-                    }
-                };
+                        copiedBtn: "Copied",
+                        prev: "Prev Chapter",
+                        next: "Next Chapter",
+                        outputTab: "Output",
+                        chapterPrefix: "Chapter",
+                        content: "Content"
+                    };
+                });
 
-                const labels = computed(() => t[lang.value]);
                 const currentCh = computed(() => courseData[currentIndex.value]);
 
-                const toggleLang = () => lang.value = lang.value === 'vi' ? 'en' : 'vi';
-
-                const setIndex = (i) => {
-                    currentIndex.value = i;
-                    activeTabs.value = {}; // Reset tab của khối minh hoạ
-                    // Cuộn phần nội dung chính lên đầu (id="main-scroll")
-                    setTimeout(() => {
-                        const mainScroll = document.getElementById('main-scroll');
-                        if (mainScroll) mainScroll.scrollTo({ top: 0, behavior: 'smooth' });
-                    }, 50);
+                const toggleLang = () => {
+                    lang.value = lang.value === 'vi' ? 'en' : 'vi';
                 };
 
-                const next = () => currentIndex.value < courseData.length - 1 && setIndex(currentIndex.value + 1);
-                const prev = () => currentIndex.value > 0 && setIndex(currentIndex.value - 1);
+                const setIndex = (idx) => {
+                    currentIndex.value = idx;
+                    activeTabs.value = {};
+                    solutions.value = {};
+                    document.getElementById('main-scroll').scrollTop = 0;
+                };
 
-                // --- XUẤT FILE WORD BẢN SUMMARY ---
+                const next = () => {
+                    if (currentIndex.value < courseData.length - 1) setIndex(currentIndex.value + 1);
+                };
+
+                const prev = () => {
+                    if (currentIndex.value > 0) setIndex(currentIndex.value - 1);
+                };
+
                 const handleDownload = () => {
                     const l = labels.value;
                     const currentLang = lang.value;
-
-                    const html = `
+                    
+                    let html = `
                         <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                        <head>
-                        <meta charset='utf-8'>
-                        <title>${l.summaryTitle}</title>
+                        <head><meta charset='utf-8'><title>${l.courseTitle}</title>
                         <style>
-                            body { font-family: 'Arial', sans-serif; padding: 20px; line-height: 1.6; color: #1e293b; }
-                            .doc-header { text-align: center; border-bottom: 3px solid #2563eb; padding-bottom: 10px; margin-bottom: 30px; }
-                            h1 { color: #1e3a8a; font-size: 24pt; margin: 0; text-transform: uppercase; }
-                            .subtitle { color: #64748b; font-size: 14pt; margin-top: 5px; }
-                            h2 { color: #2563eb; border-left: 5px solid #2563eb; padding-left: 10px; margin-top: 30pt; page-break-after: avoid; }
-                            h3 { color: #0f766e; font-size: 13pt; margin-top: 20pt; border-bottom: 1px dashed #ccc; padding-bottom: 5px; page-break-after: avoid; }
-                            h4 { color: #b45309; font-size: 11pt; margin-top: 15pt; page-break-after: avoid; }
-                            table { border-collapse: collapse; width: 100%; margin: 15pt 0; font-size: 10pt; }
-                            th, td { border: 1px solid #cbd5e1; padding: 8pt; text-align: left; }
-                            th { background: #f1f5f9; font-weight: bold; color: #1e293b; }
-                            pre { background: #f8fafc; padding: 10pt; border: 1px solid #e2e8f0; font-family: 'Courier New', Courier, monospace; font-size: 10pt; white-space: pre-wrap; border-radius: 5px; }
-                            .output-pre { background: #1e293b; color: #34d399; font-weight: bold; border: none; }
-                            code { background-color: #f1f5f9; padding: 2px 4px; font-family: 'Courier New', monospace; color: #b91c1c; }
-                            .theory-box { margin-bottom: 20px; }
+                            body { font-family: Arial, sans-serif; line-height: 1.6; }
+                            h1 { color: #1e3a8a; text-align: center; }
+                            h2 { color: #2563eb; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px; margin-top: 30px; }
+                            h3 { color: #475569; }
+                            pre { background-color: #f1f5f9; padding: 15px; border-radius: 8px; font-family: 'Courier New', Courier, monospace; font-size: 14px; white-space: pre-wrap; word-wrap: break-word; border: 1px solid #cbd5e1; }
+                            .output-pre { background-color: #f8fafc; color: #0f172a; border-left: 4px solid #10b981; }
+                            table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+                            th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
+                            th { background-color: #f1f5f9; }
                         </style>
                         </head>
                         <body>
-                        <div class="doc-header">
-                            <h1>${l.summaryTitle}</h1>
-                            <div class="subtitle">${l.courseTitle}</div>
-                        </div>
+                        <h1>${l.courseTitle}</h1>
                         ${courseData.map(ch => `
-                            <div style="page-break-inside: auto;">
-                                <br clear="all" style="page-break-before:always" />
+                            <div>
                                 <h2>${l.chapterPrefix} ${ch.id}: ${ch.title[currentLang]}</h2>
-                                <div class="theory-box">
-                                    ${ch.theory[currentLang]}
-                                </div>
-                                ${ch.codeExamples ? ch.codeExamples.map(ex => `
-                                    <h3>📋 ${ex.title ? ex.title[currentLang] : l.codeExampleTitle}</h3>
+                                <h3>📚 ${l.theory}</h3>
+                                <div>${ch.theory[currentLang]}</div>
+                                ${ch.codeExamples && ch.codeExamples.length > 0 ? ch.codeExamples.map(ex => `
+                                    <h3>📋 ${ex.title ? ex.title[currentLang] : l.example}</h3>
                                     <pre>${ex.code}</pre>
                                     <h4>👉 ${l.outputTab}:</h4>
                                     <pre class="output-pre">${ex.output}</pre>
@@ -2000,7 +2241,7 @@
                     const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
-                    a.download = l.filename; // Tên file động theo ngôn ngữ
+                    a.download = currentLang === 'vi' ? 'Tai_Lieu_C_Co_Ban.doc' : 'C_Programming_Basic.doc';
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
